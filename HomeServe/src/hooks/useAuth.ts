@@ -6,7 +6,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  userType: 'homeowner' | 'maid' | 'admin';
+  userType: 'homeowner' | 'housekeeper' | 'admin';
   profileImage?: string;
 }
 

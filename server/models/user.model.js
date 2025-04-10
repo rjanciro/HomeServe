@@ -31,7 +31,7 @@ const UserSchema = new Schema({
   },
   userType: {
     type: String,
-    enum: ['homeowner', 'maid', 'admin'],
+    enum: ['homeowner', 'housekeeper', 'admin'],
     required: true
   },
   phone: {
@@ -109,7 +109,7 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
 const User = mongoose.model('User', UserSchema);
 
 // Provider-specific schema - MOVE all provider fields here
-const MaidSchema = User.discriminator('maid', new Schema({
+const HousekeeperSchema = User.discriminator('housekeeper', new Schema({
   experience: {
     type: String,
     default: null

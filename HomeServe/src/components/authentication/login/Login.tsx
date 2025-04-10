@@ -2,7 +2,7 @@ import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import Logo from '../../../assets/icons/HomeServe_Transparent_Logo.png';
+import Logo from '../../../assets/icons/HomeServe_Logo.png';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import { UserType } from '../../../types';
 import { authService } from '../../services/auth.service';
@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
       await authService.fetchUserProfile();
       
       toast.success('Login successful!');
-      const dashboardPath = userType === 'maid' ? '/maid-dashboard' : '/dashboard';
+      const dashboardPath = userType === 'housekeeper' ? '/housekeeper-dashboard' : '/dashboard';
       navigate(dashboardPath);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -69,7 +69,7 @@ const LoginPage: React.FC = () => {
           <button
             className={`flex-1 py-3 rounded-full text-sm transition-colors
               ${userType === 'homeowner' 
-                ? 'bg-green-500 text-white' 
+                ? 'bg-[#133E87] text-white' 
                 : 'text-gray-500'}`}
             onClick={() => setUserType('homeowner')}
           >
@@ -77,12 +77,12 @@ const LoginPage: React.FC = () => {
           </button>
           <button
             className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'maid' 
-                ? 'bg-green-500 text-white' 
+              ${userType === 'housekeeper' 
+                ? 'bg-[#137D13] text-white' 
                 : 'text-gray-500'}`}
-            onClick={() => setUserType('maid')}
+            onClick={() => setUserType('housekeeper')}
           >
-            Maid
+            Housekeeper
           </button>
         </div>
 
@@ -95,7 +95,11 @@ const LoginPage: React.FC = () => {
               type="email"
               value={email}
               onChange={handleEmailChange}
-              className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+              className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                userType === 'homeowner' 
+                  ? 'focus:border-[#133E87]' 
+                  : 'focus:border-[#137D13]'
+              }`}
               required
             />
           </div>
@@ -109,7 +113,11 @@ const LoginPage: React.FC = () => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+                className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                  userType === 'homeowner' 
+                    ? 'focus:border-[#133E87]' 
+                    : 'focus:border-[#137D13]'
+                }`}
                 required
               />
               <button
@@ -123,7 +131,11 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div className="text-right">
-            <Link to="/forgot-password" className="text-gray-500 hover:text-green-500 text-sm">
+            <Link to="/forgot-password" className={`text-gray-500 hover:${
+              userType === 'homeowner' 
+                ? 'text-[#133E87]' 
+                : 'text-[#137D13]'
+            } text-sm`}>
               Forgot Password?
             </Link>
           </div>
@@ -133,7 +145,9 @@ const LoginPage: React.FC = () => {
             disabled={!isFormValid || isLoading}
             className={`w-full py-3 px-4 rounded-full transition-colors
               ${isFormValid && !isLoading
-                ? 'bg-green-500 text-white hover:bg-green-600' 
+                ? userType === 'homeowner'
+                  ? 'bg-[#133E87] text-white hover:bg-[#3A80D2]'
+                  : 'bg-[#137D13] text-white hover:bg-[#25A025]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
           >
             {isLoading ? 'Logging in...' : 'Login'}
@@ -142,7 +156,11 @@ const LoginPage: React.FC = () => {
 
         <p className="mt-8 text-center text-gray-600">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-green-500 hover:text-green-600">
+          <Link to="/signup" className={`${
+            userType === 'homeowner' 
+              ? 'text-[#133E87] hover:text-[#3A80D2]' 
+              : 'text-[#137D13] hover:text-[#25A025]'
+          }`}>
             Sign up
           </Link>
         </p>

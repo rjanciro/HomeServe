@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { UserType, FormData } from '../../../types';
-import Logo from '../../../assets/icons/HomeServe_Transparent_Logo.png';
+import Logo from '../../../assets/icons/HomeServe_Logo.png';
 import useDocumentTitle from '../../../hooks/useDocumentTitle.ts';
 import { authService } from '../../services/auth.service';
 import axios from 'axios';
@@ -24,11 +24,11 @@ const RegisterPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Check if there's a type=maid in the URL query params
+    // Check if there's a type=housekeeper in the URL query params
     const searchParams = new URLSearchParams(location.search);
     const type = searchParams.get('type');
-    if (type === 'maid') {
-      setUserType('maid');
+    if (type === 'housekeeper') {
+      setUserType('housekeeper');
     }
   }, [location]);
 
@@ -105,17 +105,17 @@ const RegisterPage: React.FC = () => {
         <div className="flex rounded-full bg-gray-100 p-1 mb-8">
           <button
             className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'homeowner' ? 'bg-green-500 text-white' : 'text-gray-500'}`}
+              ${userType === 'homeowner' ? 'bg-[#133E87] text-white' : 'text-gray-500'}`}
             onClick={() => setUserType('homeowner')}
           >
             Home Owner
           </button>
           <button
             className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'maid' ? 'bg-green-500 text-white' : 'text-gray-500'}`}
-            onClick={() => setUserType('maid')}
+              ${userType === 'housekeeper' ? 'bg-[#137D13] text-white' : 'text-gray-500'}`}
+            onClick={() => setUserType('housekeeper')}
           >
-            Maid
+            Housekeeper
           </button>
         </div>
 
@@ -130,7 +130,11 @@ const RegisterPage: React.FC = () => {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+                className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                  userType === 'homeowner' 
+                    ? 'focus:border-[#133E87]' 
+                    : 'focus:border-[#137D13]'
+                }`}
                 required
               />
             </div>
@@ -143,7 +147,11 @@ const RegisterPage: React.FC = () => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+                className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                  userType === 'homeowner' 
+                    ? 'focus:border-[#133E87]' 
+                    : 'focus:border-[#137D13]'
+                }`}
                 required
               />
             </div>
@@ -158,7 +166,11 @@ const RegisterPage: React.FC = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+              className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                userType === 'homeowner' 
+                  ? 'focus:border-[#133E87]' 
+                  : 'focus:border-[#137D13]'
+              }`}
               required
             />
           </div>
@@ -172,7 +184,11 @@ const RegisterPage: React.FC = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+              className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                userType === 'homeowner' 
+                  ? 'focus:border-[#133E87]' 
+                  : 'focus:border-[#137D13]'
+              }`}
               required
             />
           </div>
@@ -186,7 +202,11 @@ const RegisterPage: React.FC = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-b border-gray-300 focus:border-green-500 focus:outline-none"
+              className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                userType === 'homeowner' 
+                  ? 'focus:border-[#133E87]' 
+                  : 'focus:border-[#137D13]'
+              }`}
               required
             />
           </div>
@@ -202,11 +222,19 @@ const RegisterPage: React.FC = () => {
             />
             <label className="text-sm text-gray-600">
               I agree to the{' '}
-              <Link to="/terms" className="text-green-500 hover:text-green-600">
+              <Link to="/terms" className={`${
+                userType === 'homeowner' 
+                  ? 'text-[#133E87] hover:text-[#3A80D2]' 
+                  : 'text-[#137D13] hover:text-[#25A025]'
+              }`}>
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-green-500 hover:text-green-600">
+              <Link to="/privacy" className={`${
+                userType === 'homeowner' 
+                  ? 'text-[#133E87] hover:text-[#3A80D2]' 
+                  : 'text-[#137D13] hover:text-[#25A025]'
+              }`}>
                 Privacy Policy
               </Link>
             </label>
@@ -223,7 +251,9 @@ const RegisterPage: React.FC = () => {
             disabled={!isFormValid || isLoading}
             className={`w-full py-3 px-4 rounded-full transition-colors
               ${isFormValid && !isLoading
-                ? 'bg-green-500 text-white hover:bg-green-600' 
+                ? userType === 'homeowner'
+                  ? 'bg-[#133E87] text-white hover:bg-[#3A80D2]'
+                  : 'bg-[#137D13] text-white hover:bg-[#25A025]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
           >
             {isLoading ? 'Creating Account...' : 'Sign Up'}
@@ -232,7 +262,11 @@ const RegisterPage: React.FC = () => {
 
         <p className="mt-8 text-center text-gray-600">
           Already have an account?{' '}
-          <Link to="/login" className="text-green-500 hover:text-green-600">
+          <Link to="/login" className={`${
+            userType === 'homeowner' 
+              ? 'text-[#133E87] hover:text-[#3A80D2]' 
+              : 'text-[#137D13] hover:text-[#25A025]'
+          }`}>
             Login
           </Link>
         </p>

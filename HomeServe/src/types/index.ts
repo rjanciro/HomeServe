@@ -1,4 +1,4 @@
-export type UserType = 'homeowner' | 'maid' | 'admin';
+export type UserType = 'homeowner' | 'housekeeper' | 'admin';
 
 export interface User {
   id: string;

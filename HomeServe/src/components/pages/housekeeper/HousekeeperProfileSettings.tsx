@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaShieldAlt, FaCreditCard, FaBell, FaCalendarAlt, FaLock, FaQuestionCircle, FaCamera, FaSpinner, FaEdit } from 'react-icons/fa';
+import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaShieldAlt, FaCreditCard, FaBell, FaCalendarAlt, FaLock, FaQuestionCircle, FaCamera, FaSpinner, FaEdit, FaBriefcase, FaTools } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
@@ -7,14 +7,31 @@ import { profileService } from '../../services/profile.service';
 import { authService } from '../../services/auth.service';
 import { profileEvents } from '../../../utils/events';
 import ChangePasswordModal from '../../modals/ChangePasswordModal';
-import EditProfileModal from '../../modals/EditProfileModal';
+import EditProfileModal, { EditProfileModalProps } from '../../modals/EditProfileModal';
 import { User } from '../../../types';
 import axios from 'axios';
 
 // Define a type for notification keys
 type NotificationType = 'email' | 'push' | 'sms';
 
-const ServiceProviderSettings: React.FC = () => {
+// Define the housekeeper profile data structure
+interface HousekeeperProfileData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  houseNumber: string;
+  streetName: string;
+  barangay: string;
+  cityMunicipality: string;
+  province: string;
+  zipCode: string;
+  experience?: string;  // Make optional
+  specialties?: string; // Make optional
+  bio: string;
+}
+
+const HousekeeperProfileSettings: React.FC = () => {
   useDocumentTitle('Profile');
 
   const [user, setUser] = useState<User | null>(null);
@@ -22,7 +39,7 @@ const ServiceProviderSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
   
   // State for profile data
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<HousekeeperProfileData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -33,7 +50,8 @@ const ServiceProviderSettings: React.FC = () => {
     cityMunicipality: '',
     province: '',
     zipCode: '',
-    businessName: '',
+    experience: '',
+    specialties: '',
     bio: ''
   });
   
@@ -69,7 +87,8 @@ const ServiceProviderSettings: React.FC = () => {
         cityMunicipality: user.cityMunicipality || '',
         province: user.province || '',
         zipCode: user.zipCode || '',
-        businessName: user.businessName || '',
+        experience: user.experience || '',
+        specialties: user.specialties || '',
         bio: user.bio || ''
       });
       
@@ -95,7 +114,8 @@ const ServiceProviderSettings: React.FC = () => {
             cityMunicipality: updatedUser.cityMunicipality || '',
             province: updatedUser.province || '',
             zipCode: updatedUser.zipCode || '',
-            businessName: updatedUser.businessName || '',
+            experience: updatedUser.experience || '',
+            specialties: updatedUser.specialties || '',
             bio: updatedUser.bio || ''
           });
           
@@ -187,7 +207,7 @@ const ServiceProviderSettings: React.FC = () => {
   };
 
   // Handle profile update from modal
-  const handleProfileUpdate = async (updatedData: typeof formData) => {
+  const handleProfileUpdate = async (updatedData: EditProfileModalProps['formData']) => {
     try {
       console.log('About to update profile with data:', updatedData);
       
@@ -200,7 +220,9 @@ const ServiceProviderSettings: React.FC = () => {
         barangay: updatedData.barangay || '',
         cityMunicipality: updatedData.cityMunicipality || '',
         province: updatedData.province || '',
-        zipCode: updatedData.zipCode || ''
+        zipCode: updatedData.zipCode || '',
+        experience: updatedData.experience || '',
+        specialties: updatedData.specialties || ''
       };
       
       const response = await profileService.updateProfile(dataToUpdate);
@@ -245,13 +267,13 @@ const ServiceProviderSettings: React.FC = () => {
       <h1 className="text-2xl font-bold mb-8 text-left">Profile Settings</h1>
       
       {/* Profile Image Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 transition-all hover:shadow-lg">
         <h2 className="text-xl font-semibold mb-6 text-left">Profile Image</h2>
         
         <div className="flex flex-col items-start">
           <div className="relative mb-4">
             <div 
-              className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500/20 bg-gray-100 flex items-center justify-center cursor-pointer group"
+              className="w-28 h-28 rounded-full overflow-hidden border-4 border-green-500/20 bg-gray-100 flex items-center justify-center cursor-pointer group transition-transform hover:scale-105"
               onClick={handleProfileImageClick}
             >
               {profileImage ? (
@@ -261,14 +283,14 @@ const ServiceProviderSettings: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <FaUser className="text-gray-400 text-4xl" />
+                <FaUser className="text-gray-400 text-5xl" />
               )}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <FaCamera className="text-white text-xl" />
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                <FaCamera className="text-white text-2xl" />
               </div>
               {isUploading && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <FaSpinner className="text-white text-xl animate-spin" />
+                  <FaSpinner className="text-white text-2xl animate-spin" />
                 </div>
               )}
             </div>
@@ -318,18 +340,17 @@ const ServiceProviderSettings: React.FC = () => {
       )}
       
       {/* Profile Information Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 transition-all hover:shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">
-            <FaUser className="text-green-500 mr-2" />
+            <FaUser className="text-green-600 mr-2" />
             <h2 className="text-xl font-semibold">Personal Information</h2>
           </div>
           <button 
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center"
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all flex items-center gap-2 shadow-sm hover:shadow"
             onClick={() => setIsEditProfileModalOpen(true)}
           >
-            <FaEdit className="mr-2" />
-            Edit Profile
+            <FaEdit /> Edit Profile
           </button>
         </div>
         
@@ -339,85 +360,97 @@ const ServiceProviderSettings: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                   {formData.firstName}
                 </div>
               </div>
               <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                   {formData.lastName}
                 </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                   {formData.email}
                 </div>
               </div>
               <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                   {formData.phone || 'Not provided'}
                 </div>
               </div>
             </div>
             
-            <div className="text-left">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
-              <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
-                {formData.businessName || 'Not provided'}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="text-left">
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <FaBriefcase className="mr-2 text-green-600" /> Experience
+                </label>
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
+                  {formData.experience || 'Not provided'}
+                </div>
+              </div>
+              <div className="text-left">
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <FaTools className="mr-2 text-green-600" /> Specialties
+                </label>
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
+                  {formData.specialties || 'Not provided'}
+                </div>
               </div>
             </div>
             
             <div className="text-left">
               <h3 className="font-medium mb-2 text-gray-700">Address Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                 <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">House/Building Number</label>
-                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">House/Building Number</label>
+                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                     {formData.houseNumber || 'Not provided'}
                   </div>
                 </div>
                 <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Street Name</label>
-                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Street Name</label>
+                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                     {formData.streetName || 'Not provided'}
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                 <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
-                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Barangay</label>
+                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                     {formData.barangay || 'Not provided'}
                   </div>
                 </div>
                 <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City/Municipality</label>
-                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City/Municipality</label>
+                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                     {formData.cityMunicipality || 'Not provided'}
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
-                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
+                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                     {formData.province || 'Not provided'}
                   </div>
                 </div>
                 <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
-                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
+                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
                     {formData.zipCode || 'Not provided'}
                   </div>
                 </div>
@@ -425,8 +458,8 @@ const ServiceProviderSettings: React.FC = () => {
             </div>
             
             <div className="text-left">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-              <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 min-h-[100px]">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+              <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 min-h-[100px] whitespace-pre-wrap shadow-inner">
                 {formData.bio || 'No bio provided'}
               </div>
             </div>
@@ -483,7 +516,7 @@ const ServiceProviderSettings: React.FC = () => {
                 checked={notifications.email}
                 onChange={() => handleNotificationChange('email')}
               />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+              <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
             </label>
           </div>
           
@@ -567,4 +600,4 @@ const ServiceProviderSettings: React.FC = () => {
   );
 };
 
-export default ServiceProviderSettings;
+export default HousekeeperProfileSettings;

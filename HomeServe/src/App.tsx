@@ -25,6 +25,7 @@ import HousekeeperProfileSettings from './components/pages/housekeeper/Housekeep
 import HousekeeperSidebar from './components/layout/HousekeeperSidebar';
 import BookingRequests from './components/pages/housekeeper/BookingRequests';
 import MyServices from './components/pages/housekeeper/MyServices';
+import JobApplications from './components/pages/housekeeper/JobApplications';
 
 // Admin Components
 import AdminLogin from './components/authentication/login/AdminLogin';
@@ -42,7 +43,7 @@ import { MessagingProvider } from './contexts/MessagingContext';
 import UsersServiceProvidersPage from './components/pages/admin/user-management/UsersServiceProviders';
 import ProviderVerificationDetailsPage from './components/pages/admin/user-management/ProviderVerificationDetails';
 // import MyServices from './components/pages/service-provider/MyServices';
-// import VerificationDocumentsPage from './components/pages/service-provider/VerificationDocuments';
+import VerificationDocumentsPage from './components/pages/housekeeper/VerificationDocuments';
 
 
 const App: React.FC = () => {
@@ -108,7 +109,8 @@ const App: React.FC = () => {
               <Route path="/housekeeper/booking-requests" element={<BookingRequests />} />
               <Route path="/housekeeper/messages" element={<HousekeeperMessaging />} />
               <Route path="/housekeeper/profile" element={<HousekeeperProfileSettings />} />
-              {/* <Route path="/maid/verification-documents" element={<VerificationDocumentsPage />} /> */}
+              <Route path="/housekeeper/job-applications" element={<JobApplications />} />
+              <Route path="/maid/verification-documents" element={<VerificationDocumentsPage />} />
             </Route>
 
             {/* Admin routes */}

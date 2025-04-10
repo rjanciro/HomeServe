@@ -3,7 +3,7 @@ import { authService } from '../services/auth.service';
 
 interface PrivateRouteProps {
   element: React.ReactElement;
-  userType?: 'homeowner' | 'maid';
+  userType?: 'homeowner' | 'housekeeper';
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ element, userType }) => {

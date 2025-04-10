@@ -4,10 +4,10 @@ import Login from './components/authentication/login/Login';
 import AdminLogin from './components/authentication/login/AdminLogin';
 import Register from './components/authentication/register/Register';
 import HomeownerDashboard from './components/dashboard/home-owner/HomeownerDashboard';
-import MaidDashboard from './components/dashboard/maid/MaidDashboard';
+import HousekeeperDashboard from './components/dashboard/housekeeper/HousekeeperDashboard';
 import FindServices from './components/pages/home-owner/FindServices';
 import HomeOwnerSidebar from './components/layout/HomeOwnerSidebar';
-import MaidSidebar from './components/layout/MaidSidebar';
+import HousekeeperSidebar from './components/layout/HousekeeperSidebar';
 import History from './components/pages/home-owner/History';
 import Messaging from './components/pages/home-owner/HomeOwnerMessaging';
 import HomeOwnerProfileSettings from './components/pages/home-owner/HomeOwnerProfileSettings';
@@ -15,8 +15,8 @@ import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/guards/PrivateRoute';
 import AboutUsPage from './components/pages/AboutUsPage';
 // import MyServices from './components/pages/service-provider/MyServices';
-import MaidMessaging from './components/pages/maid/MaidMessaging';
-import MaidProfileSettings from './components/pages/maid/MaidProfileSettings';
+import HousekeeperMessaging from './components/pages/housekeeper/HousekeeperMessaging';
+import HousekeeperProfileSettings from './components/pages/housekeeper/HousekeeperProfileSettings';
 import AdminSidebar from './components/layout/AdminSidebar';
 import AdminDashboard from './components/dashboard/admin/AdminDashboard';
 import PrivateAdminRoute from './components/routes/PrivateAdminRoute';
@@ -82,13 +82,13 @@ const App: React.FC = () => {
               <Route path="/profile" element={<HomeOwnerProfileSettings />} />
             </Route>
 
-            {/* Maid routes */}
-            <Route element={<PrivateRoute element={<MaidSidebar />} userType="maid" />}>
-              <Route path="/maid-dashboard" element={<MaidDashboard />} />
+            {/* Housekeeper routes */}
+            <Route element={<PrivateRoute element={<HousekeeperSidebar />} userType="housekeeper" />}>
+              <Route path="/housekeeper-dashboard" element={<HousekeeperDashboard />} />
               {/* <Route path="/maid/my-services" element={<MyServices />} /> */}
               {/* <Route path="/maid/booking-requests" element={<BookingRequests />} /> */}
-              <Route path="/maid/messages" element={<MaidMessaging />} />
-              <Route path="/maid/profile" element={<MaidProfileSettings />} />
+              <Route path="/housekeeper/messages" element={<HousekeeperMessaging />} />
+              <Route path="/housekeeper/profile" element={<HousekeeperProfileSettings />} />
               {/* <Route path="/maid/verification-documents" element={<VerificationDocumentsPage />} /> */}
             </Route>
 

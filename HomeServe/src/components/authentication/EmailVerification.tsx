@@ -16,15 +16,7 @@ const EmailVerification = () => {
 
     const verifyUserEmail = async () => {
       try {
-        const email = localStorage.getItem('pendingVerificationEmail') || '';
-        
-        if (!email) {
-          setStatus('error');
-          console.error('No email found for verification');
-          return;
-        }
-        
-        const response = await authService.verifyPin(email, token);
+        const response = await authService.verifyEmail(token);
         setStatus('success');
         
         setTimeout(() => {

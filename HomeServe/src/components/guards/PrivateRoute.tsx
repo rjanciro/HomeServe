@@ -17,7 +17,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element, userType }) => {
   }
 
   if (userType && user.userType !== userType) {
-    const redirectPath = user.userType === 'provider' ? '/provider-dashboard' : '/dashboard';
+    const redirectPath = user.userType === 'housekeeper' ? '/housekeeper-dashboard' : '/dashboard';
     return <Navigate to={redirectPath} replace />;
   }
 

@@ -9,6 +9,7 @@ exports.uploadProfileImage = async (req, res) => {
       return res.status(400).json({ message: 'No image file provided' });
     }
 
+    console.log("File upload details:", req.file);
     const userId = req.user.userId;
 
     // Find the user
@@ -17,25 +18,36 @@ exports.uploadProfileImage = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // If user already has a profile image, delete the old file
+    // If user already has a profile image, delete the old file if it exists
     if (user.profileImage) {
-      const oldImagePath = path.join(__dirname, '..', user.profileImage);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+      try {
+        const oldImagePath = path.join(__dirname, '..', user.profileImage);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+          console.log(`Deleted old profile image: ${oldImagePath}`);
+        }
+      } catch (deleteError) {
+        console.error('Error deleting old profile image:', deleteError);
+        // Continue with the update even if deletion fails
       }
     }
 
     // Create relative path to the uploaded file
     const imagePath = `/uploads/profile_pictures/${req.file.filename}`;
+    console.log(`New profile image path: ${imagePath}`);
 
     // Update user with new image path
     user.profileImage = imagePath;
     await user.save();
 
+    // Create full URL to return to client
+    const imageUrl = `${process.env.SERVER_URL || 'http://localhost:8080'}${imagePath}`;
+    console.log(`Full image URL: ${imageUrl}`);
+
     // Return success response
     res.status(200).json({ 
       message: 'Profile image uploaded successfully',
-      imageUrl: `${process.env.SERVER_URL || 'http://localhost:8080'}${imagePath}`
+      imageUrl: imageUrl
     });
 
   } catch (error) {
@@ -81,7 +93,8 @@ exports.updateProfile = async (req, res) => {
       'firstName', 'lastName', 'middleName', 'phone', 
       'businessName', 'businessDescription', 'bio',
       'houseNumber', 'streetName', 'barangay', 
-      'cityMunicipality', 'province', 'zipCode'
+      'cityMunicipality', 'province', 'zipCode',
+      'latitude', 'longitude'
     ];
     
     console.log('Before filtering:', Object.keys(updates));
@@ -109,7 +122,9 @@ exports.updateProfile = async (req, res) => {
         barangay: existingUser.barangay,
         cityMunicipality: existingUser.cityMunicipality,
         province: existingUser.province,
-        zipCode: existingUser.zipCode
+        zipCode: existingUser.zipCode,
+        latitude: existingUser.latitude,
+        longitude: existingUser.longitude
       };
     }
     

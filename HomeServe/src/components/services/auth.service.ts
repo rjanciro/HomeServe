@@ -11,24 +11,69 @@ export const authService = {
     password: string;
     userType: UserType;
   }) {
-    // Only allow homeowner or provider registrations
-    if (userData.userType !== 'homeowner' && userData.userType !== 'provider') {
+    // Only allow homeowner or housekeeper registrations
+    if (userData.userType !== 'homeowner' && userData.userType !== 'housekeeper') {
       throw new Error('Invalid user type');
     }
     
-    const response = await axios.post(`${API_URL}/auth/register`, userData);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    try {
+      // Map "housekeeper" to "provider" for the backend
+      const backendUserData = {
+        ...userData,
+        // Convert housekeeper to provider for the backend API
+        userType: userData.userType === 'housekeeper' ? 'housekeeper' : userData.userType
+      };
+      
+      console.log('Registering user with data:', {
+        ...backendUserData, 
+        password: '[REDACTED]',
+        originalUserType: userData.userType
+      });
+      
+      // Add more detailed error handling for network issues
+      try {
+        const response = await axios.post(`${API_URL}/auth/register`, backendUserData);
+        
+        // Store email for verification process
+        localStorage.setItem('pendingVerificationEmail', userData.email);
+        
+        if (response.data.token) {
+          // When storing in localStorage, use the original userType
+          // This ensures frontend still knows it's a housekeeper
+          const userToStore = {
+            ...response.data.user,
+            userType: userData.userType // keep the frontend terminology
+          };
+          
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(userToStore));
+        }
+        return response.data;
+      } catch (axiosError) {
+        if (axios.isAxiosError(axiosError)) {
+          console.error('Registration network error:', axiosError.message);
+          console.error('Request details:', axiosError.config);
+          if (axiosError.response) {
+            console.error('Server response status:', axiosError.response.status);
+            console.error('Server response:', axiosError.response.data);
+          }
+        }
+        throw axiosError;
+      }
+    } catch (error) {
+      console.error('Registration error details:', error);
+      throw error;
     }
-    return response.data;
   },
 
   async login(email: string, password: string, userType: UserType) {
+    // Map userType for backend
+    const backendUserType = userType === 'housekeeper' ? 'housekeeper' : userType;
+    
     const response = await axios.post(`${API_URL}/auth/login`, {
       email,
       password,
-      userType
+      userType: backendUserType
     });
     
     // Store the token
@@ -36,6 +81,12 @@ export const authService = {
     
     // Get complete user profile with all fields after successful login
     const userProfile = await this.fetchUserProfile();
+    
+    // Ensure the frontend user type is preserved
+    if (userProfile && backendUserType === 'housekeeper') {
+      userProfile.userType = 'housekeeper';
+      localStorage.setItem('user', JSON.stringify(userProfile));
+    }
     
     return userProfile;
   },
@@ -155,7 +206,8 @@ export const authService = {
 
   async requestPasswordChangePin(email: string) {
     try {
-      const response = await axios.post(`${API_URL}/auth/request-password-change-pin`, 
+      const response = await axios.post(
+        `${API_URL}/auth/request-password-change-pin`, 
         { email },
         {
           headers: {
@@ -173,7 +225,7 @@ export const authService = {
   async verifyPasswordChangePin(email: string, pin: string, newPassword: string) {
     try {
       const response = await axios.post(
-        `${API_URL}/auth/verify-password-change-pin`,
+        `${API_URL}/auth/verify-password-change-pin`, 
         { email, pin, newPassword },
         {
           headers: {
@@ -187,4 +239,4 @@ export const authService = {
       throw error;
     }
   }
-}; 
+}

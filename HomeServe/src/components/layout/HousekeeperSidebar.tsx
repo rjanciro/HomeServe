@@ -8,7 +8,7 @@ import { profileEvents } from '../../utils/events';
 import { profileService } from '../services/profile.service';
 import { toast } from 'react-hot-toast';
 
-const ServiceProviderSidebar: React.FC = () => {
+const HousekeeperSidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({});
@@ -34,7 +34,7 @@ const ServiceProviderSidebar: React.FC = () => {
     
     // Subscribe to profile update events
     const unsubscribe = profileEvents.onProfileUpdate(() => {
-      console.log("Profile updated event received in ServiceProviderSidebar, refreshing user data");
+      console.log("Profile updated event received in HousekeeperSidebar, refreshing user data");
       loadCurrentUser();
     });
     
@@ -73,11 +73,11 @@ const ServiceProviderSidebar: React.FC = () => {
 
   const getNavItems = () => {
     return [
-      { path: '/provider-dashboard', icon: FaHome, label: 'Dashboard' },
-      { path: '/provider/booking-requests', icon: FaBriefcase, label: 'Booking Requests' },
-      { path: '/provider/my-services', icon: FaTools, label: 'My Services' },
-      { path: '/provider/messages', icon: FaComments, label: 'Messages' },
-      { path: '/provider/profile', icon: FaUser, label: 'Profile' },
+      { path: '/housekeeper-dashboard', icon: FaHome, label: 'Dashboard' },
+      { path: '/housekeeper/booking-requests', icon: FaBriefcase, label: 'Booking Requests' },
+      { path: '/housekeeper/my-services', icon: FaTools, label: 'My Services' },
+      { path: '/housekeeper/messages', icon: FaComments, label: 'Messages' },
+      { path: '/housekeeper/profile', icon: FaUser, label: 'Profile' },
     ];
   };
 
@@ -95,7 +95,7 @@ const ServiceProviderSidebar: React.FC = () => {
           >
             <FaBars size={20} />
             {!isCollapsed && (
-              <span className="ml-3 font-semibold text-gray-800">Home Serve | Provider</span>
+              <span className="ml-3 font-semibold text-gray-800">Home Serve | Housekeeper</span>
             )}
           </button>
         </div>
@@ -161,4 +161,4 @@ const ServiceProviderSidebar: React.FC = () => {
   );
 };
 
-export default ServiceProviderSidebar;
+export default HousekeeperSidebar;

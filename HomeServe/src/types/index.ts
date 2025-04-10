@@ -15,6 +15,8 @@ export interface User {
   cityMunicipality?: string;
   province?: string;
   zipCode?: string;
+  latitude?: number;
+  longitude?: number;
   experience?: string;
   specialties?: string;
   bio?: string;

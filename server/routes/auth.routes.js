@@ -10,7 +10,7 @@ const registerValidation = [
   check('lastName', 'Last name is required').not().isEmpty(),
   check('email', 'Please include a valid email').isEmail(),
   check('password', 'Password must be 6 or more characters').isLength({ min: 6 }),
-  check('userType', 'User type must be either homeowner or provider').isIn(['homeowner', 'provider'])
+  check('userType', 'User type must be either homeowner or housekeeper').isIn(['homeowner', 'housekeeper'])
 ];
 
 const loginValidation = [

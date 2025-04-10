@@ -32,6 +32,11 @@ const RegisterPage: React.FC = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    // Log when user type changes
+    console.log(`User type set to: ${userType}`);
+  }, [userType]);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -46,10 +51,13 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Make sure email is trimmed and lowercase
+      const email = formData.email.trim().toLowerCase();
+      
       const userData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: email,
         password: formData.password,
         userType
       };
@@ -61,22 +69,38 @@ const RegisterPage: React.FC = () => {
         return;
       }
 
+      console.log(`Attempting to register as ${userType}...`);
+      
       const response = await authService.register(userData);
       console.log('Registration successful:', response);
       
       // Redirect to verification pending page
-      navigate('/verification-pending', { state: { email: formData.email } });
+      navigate('/verification-pending', { state: { email: email } });
     } catch (err) {
       console.error('Registration error:', err);
       
       if (axios.isAxiosError(err) && err.response) {
-        // Check if the response has validation errors
-        if (err.response.data.errors) {
-          const errorMessages = err.response.data.errors.map((e: any) => e.msg).join(', ');
+        // Log more details about the error
+        console.log('Error status:', err.response.status);
+        console.log('Error data:', err.response.data);
+        
+        if (err.response.data.errors && err.response.data.errors.length > 0) {
+          console.log('Validation errors:', err.response.data.errors);
+          
+          // Display all validation errors to the user
+          const errorMessages = err.response.data.errors.map((e: any) => {
+            return e.msg || e.message || JSON.stringify(e);
+          }).join(', ');
+          
           setError(errorMessages);
+        } else if (err.response.data.message) {
+          setError(err.response.data.message);
         } else {
-          setError(err.response.data.message || 'Registration failed');
+          setError(`Registration failed: ${err.response.status} - ${err.response.statusText}`);
         }
+        
+        // Log the full response for debugging
+        console.log('Full error response:', err.response.data);
       } else {
         setError('An unexpected error occurred. Please try again later.');
       }
@@ -104,16 +128,24 @@ const RegisterPage: React.FC = () => {
         {/* User Type Toggle */}
         <div className="flex rounded-full bg-gray-100 p-1 mb-8">
           <button
+            type="button"
             className={`flex-1 py-3 rounded-full text-sm transition-colors
               ${userType === 'homeowner' ? 'bg-[#133E87] text-white' : 'text-gray-500'}`}
-            onClick={() => setUserType('homeowner')}
+            onClick={() => {
+              setUserType('homeowner');
+              console.log('Set user type to homeowner');
+            }}
           >
             Home Owner
           </button>
           <button
+            type="button"
             className={`flex-1 py-3 rounded-full text-sm transition-colors
               ${userType === 'housekeeper' ? 'bg-[#137D13] text-white' : 'text-gray-500'}`}
-            onClick={() => setUserType('housekeeper')}
+            onClick={() => {
+              setUserType('housekeeper');
+              console.log('Set user type to housekeeper');
+            }}
           >
             Housekeeper
           </button>

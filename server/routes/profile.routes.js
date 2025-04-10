@@ -1,40 +1,36 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-const auth = require('../middleware/auth');
 const { uploadProfileImage, getUserProfile, updateProfile } = require('../controllers/profile.controller');
-const User = require('../models/user.model');
 
-// Configure multer for file storage
+// Configure storage for profile images
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Create uploads directory if it doesn't exist
-    const uploadDir = path.join(__dirname, '..', 'uploads/profile_pictures');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/profile_pictures');
   },
-  filename: (req, file, cb) => {
-    // Create unique filename with user ID and timestamp
-    const userId = req.user.userId;
-    const fileExt = path.extname(file.originalname);
-    const fileName = `${userId}-${Date.now()}${fileExt}`;
-    cb(null, fileName);
+  filename: function(req, file, cb) {
+    // Use userId in filename for easy identification
+    const userId = req.user ? req.user.userId : 'unknown';
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, `profile-${userId}-${uniqueSuffix}${ext}`);
   }
 });
 
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
+// Configure multer with increased file size limit
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // Increased to 10MB
+  },
+  fileFilter: function(req, file, cb) {
     // Accept only image files
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'));
+      cb(new Error('Only image files are allowed!'), false);
     }
   }
 });
@@ -43,5 +39,18 @@ const upload = multer({
 router.post('/upload-image', auth, upload.single('profileImage'), uploadProfileImage);
 router.get('/', auth, getUserProfile);
 router.put('/', auth, updateProfile);
+
+// Add an error handler for multer errors
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ 
+        message: 'File is too large. Maximum size is 10MB.' 
+      });
+    }
+    return res.status(400).json({ message: err.message });
+  }
+  next(err);
+});
 
 module.exports = router;

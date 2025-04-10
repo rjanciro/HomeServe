@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
-import { FaHome, FaSearch, FaHistory, FaComments, FaCog, FaSignOutAlt, FaBars } from 'react-icons/fa';
+import { FaHome, FaSearch, FaHistory, FaComments, FaCog, FaSignOutAlt, FaBars, FaCalendarAlt, FaClipboardList } from 'react-icons/fa';
 import { authService } from '../services/auth.service';
 import { User } from '../../types';
 import Swal from 'sweetalert2';
+import toast from 'react-hot-toast';
 import { profileEvents } from '../../utils/events';
 import { profileService } from '../services/profile.service';
 
@@ -37,7 +38,7 @@ const HomeOwnerSidebar: React.FC = () => {
       text: "You will be logged out of your account",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#22C55E',
+      confirmButtonColor: '#133E87',
       cancelButtonColor: '#EF4444',
       confirmButtonText: 'Yes, logout',
       cancelButtonText: 'Cancel'
@@ -45,13 +46,7 @@ const HomeOwnerSidebar: React.FC = () => {
       if (result.isConfirmed) {
         authService.logout();
         navigate('/login');
-        Swal.fire({
-          title: 'Logged Out!',
-          text: 'You have been successfully logged out',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false
-        });
+        toast.success('Successfully logged out');
       }
     });
   };
@@ -59,7 +54,8 @@ const HomeOwnerSidebar: React.FC = () => {
   const getNavItems = () => {
     return [
       { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
-      { path: '/find-services', icon: FaSearch, label: 'Find Services' },
+      { path: '/one-time-booking', icon: FaCalendarAlt, label: 'One-Time Bookings' },
+      { path: '/job-posts', icon: FaClipboardList, label: 'Job Posts' },
       { path: '/history', icon: FaHistory, label: 'History' },
       { path: '/messages', icon: FaComments, label: 'Messages' },
       { path: '/profile', icon: FaCog, label: 'Profile' }
@@ -76,13 +72,13 @@ const HomeOwnerSidebar: React.FC = () => {
         <div className="border-b border-gray-200 h-[73px]">
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`w-full h-full hover:bg-gray-100 text-gray-600 flex items-center ${
+            className={`w-full h-full hover:bg-gray-100 text-[#133E87] flex items-center ${
               isCollapsed ? 'justify-center' : 'px-4'
             }`}
           >
             <FaBars size={20} />
             {!isCollapsed && (
-              <span className="ml-3 font-semibold text-gray-800">HomeServe</span>
+              <span className="ml-3 font-semibold text-[#133E87]">HomeServe</span>
             )}
           </button>
         </div>
@@ -97,8 +93,8 @@ const HomeOwnerSidebar: React.FC = () => {
                   className={`flex items-center py-3 transition-all duration-300
                     ${isCollapsed ? 'justify-center px-0' : 'px-7'} 
                     ${location.pathname === path 
-                      ? 'bg-green-50 text-green-600'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-[#E6EBF4] text-[#133E87]'
+                      : 'text-gray-600 hover:bg-[#F0F4FA] hover:text-[#133E87]'
                     }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -131,7 +127,7 @@ const HomeOwnerSidebar: React.FC = () => {
                   ? profileService.getFullImageUrl(user.profileImage) 
                   : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
                 alt="Profile"
-                className="w-10 h-10 rounded-full ring-2 ring-gray-100"
+                className="w-10 h-10 rounded-full ring-2 ring-[#133E87]"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";

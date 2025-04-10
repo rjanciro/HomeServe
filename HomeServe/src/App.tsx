@@ -1,32 +1,47 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+
+// General Components
 import LandingPage from './components/pages/LandingPage';
-import Login from './components/authentication/login/Login';
-import AdminLogin from './components/authentication/login/AdminLogin';
+import AboutUsPage from './components/pages/AboutUsPage';
 import Register from './components/authentication/register/Register';
-import HomeownerDashboard from './components/dashboard/home-owner/HomeownerDashboard';
-import HousekeeperDashboard from './components/dashboard/housekeeper/HousekeeperDashboard';
+import Login from './components/authentication/login/Login';
+import PrivateRoute from './components/guards/PrivateRoute';
+
+// Home Owner Components
+import HomeOwnerDashboard from './components/dashboard/home-owner/HomeOwnerDashboard';
 import FindServices from './components/pages/home-owner/FindServices';
 import HomeOwnerSidebar from './components/layout/HomeOwnerSidebar';
-import HousekeeperSidebar from './components/layout/HousekeeperSidebar';
-import History from './components/pages/home-owner/History';
 import Messaging from './components/pages/home-owner/HomeOwnerMessaging';
+import History from './components/pages/home-owner/History';
 import HomeOwnerProfileSettings from './components/pages/home-owner/HomeOwnerProfileSettings';
-import { Toaster } from 'react-hot-toast';
-import PrivateRoute from './components/guards/PrivateRoute';
-import AboutUsPage from './components/pages/AboutUsPage';
-// import MyServices from './components/pages/service-provider/MyServices';
+import JobPosts from './components/pages/home-owner/JobPosts';
+import OneTimeBooking from './components/pages/home-owner/OneTimeBooking';
+
+// Housekeeper Components
+import HousekeeperDashboard from './components/dashboard/housekeeper/HousekeeperDashboard';
 import HousekeeperMessaging from './components/pages/housekeeper/HousekeeperMessaging';
 import HousekeeperProfileSettings from './components/pages/housekeeper/HousekeeperProfileSettings';
+import HousekeeperSidebar from './components/layout/HousekeeperSidebar';
+
+// Admin Components
+import AdminLogin from './components/authentication/login/AdminLogin';
 import AdminSidebar from './components/layout/AdminSidebar';
 import AdminDashboard from './components/dashboard/admin/AdminDashboard';
 import PrivateAdminRoute from './components/routes/PrivateAdminRoute';
+
+// Both Components
+import EmailVerification from './components/authentication/EmailVerification';
+import VerificationPending from './components/authentication/VerificationPending';
+
+
+// Undecided Components
 import { MessagingProvider } from './contexts/MessagingContext';
 import UsersServiceProvidersPage from './components/pages/admin/user-management/UsersServiceProviders';
 import ProviderVerificationDetailsPage from './components/pages/admin/user-management/ProviderVerificationDetails';
+// import MyServices from './components/pages/service-provider/MyServices';
 // import VerificationDocumentsPage from './components/pages/service-provider/VerificationDocuments';
 // import BookingRequests from './components/pages/service-provider/BookingRequests';
-import EmailVerification from './components/authentication/EmailVerification';
-import VerificationPending from './components/authentication/VerificationPending';
 
 const App: React.FC = () => {
   return (
@@ -73,13 +88,15 @@ const App: React.FC = () => {
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/signup" element={<Register />} />
             
-            {/* Homeowner routes */}
+            {/* Home Owner routes */}
             <Route element={<PrivateRoute element={<HomeOwnerSidebar />} userType="homeowner" />}>
-              <Route path="/dashboard" element={<HomeownerDashboard />} />
+              <Route path="/dashboard" element={<HomeOwnerDashboard />} />
+              <Route path="/job-posts" element={<JobPosts />} />
               <Route path="/find-services" element={<FindServices />} />
               <Route path="/history" element={<History />} />
               <Route path="/messages" element={<Messaging />} />
               <Route path="/profile" element={<HomeOwnerProfileSettings />} />
+              <Route path="/one-time-booking" element={<OneTimeBooking />} />
             </Route>
 
             {/* Housekeeper routes */}

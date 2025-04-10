@@ -9,7 +9,10 @@ const { sendVerificationEmail, sendPasswordChangePinEmail } = require('../utils/
 const authController = {
   register: async (req, res) => {
     try {
-      console.log('Registration attempt:', req.body);
+      console.log('Registration attempt received:', { 
+        ...req.body,
+        password: '[REDACTED]' 
+      });
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -18,6 +21,13 @@ const authController = {
       }
 
       const { firstName, lastName, email, password, userType } = req.body;
+      
+      // Quick validation check
+      if (userType !== 'homeowner' && userType !== 'housekeeper') {
+        return res.status(400).json({
+          errors: [{ msg: 'User type must be either homeowner or housekeeper' }]
+        });
+      }
 
       // Check if user already exists
       let user = await User.findOne({ email });
@@ -30,50 +40,83 @@ const authController = {
       const verificationPin = Math.floor(100000 + Math.random() * 900000).toString();
       const verificationPinExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-      // Create new user with verification PIN
-      user = new User({
-        firstName,
-        lastName,
-        email,
-        password,
-        userType,
-        verificationPin,
-        verificationPinExpires,
-        isEmailVerified: false
-      });
-
-      console.log('Saving new user:', user);
-      await user.save();
-      console.log('User saved successfully');
-
-      // Try to send verification email
       try {
-        const emailSent = await sendVerificationEmail(email, verificationPin);
+        // Test User model creation before saving
+        console.log(`Creating new ${userType} user...`);
         
-        if (!emailSent) {
-          console.warn(`Failed to send verification email to ${email}, but user was created`);
+        // Create new user with verification PIN
+        if (userType === 'housekeeper') {
+          console.log('Creating housekeeper-type user with schema:', User.discriminators.housekeeper.schema.paths);
+          // Ensure we create a valid housekeeper model
+          user = new User.discriminators.housekeeper({
+            firstName,
+            lastName,
+            email,
+            password,
+            userType,
+            verificationPin,
+            verificationPinExpires,
+            isEmailVerified: false
+          });
         } else {
-          console.log(`Verification email with PIN sent successfully to ${email}`);
+          console.log('Creating homeowner-type user with schema:', User.discriminators.homeowner.schema.paths);
+          // Regular homeowner model
+          user = new User.discriminators.homeowner({
+            firstName,
+            lastName,
+            email,
+            password,
+            userType,
+            verificationPin,
+            verificationPinExpires,
+            isEmailVerified: false
+          });
         }
-      } catch (emailError) {
-        console.error('Email sending error:', emailError);
-      }
 
-      // Return success response
-      res.status(201).json({
-        message: 'Registration successful. Please check your email for a verification PIN.',
-        user: {
+        console.log('New user object created, about to save:', { 
           id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
           userType: user.userType,
-          isEmailVerified: user.isEmailVerified
+          model: user.constructor.modelName
+        });
+        
+        await user.save();
+        console.log('User saved successfully');
+
+        // Try to send verification email
+        try {
+          const emailSent = await sendVerificationEmail(email, verificationPin);
+          
+          if (!emailSent) {
+            console.warn(`Failed to send verification email to ${email}, but user was created`);
+          } else {
+            console.log(`Verification email with PIN sent successfully to ${email}`);
+          }
+        } catch (emailError) {
+          console.error('Email sending error:', emailError);
         }
-      });
+        
+        // Return success response
+        return res.status(201).json({
+          message: 'Registration successful. Please check your email for a verification PIN.',
+          user: {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            userType: user.userType,
+            isEmailVerified: user.isEmailVerified
+          }
+        });
+      } catch (modelError) {
+        console.error('User model error:', modelError);
+        return res.status(500).json({ 
+          message: 'Server error creating user model',
+          error: modelError.message
+        });
+      }
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ message: 'Server error' });
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
   },
   
@@ -178,22 +221,22 @@ const authController = {
     try {
       const { token } = req.params;
 
-      // Find user with the token and check if it's expired
+      // Find user with the token as verificationPin and check if it's expired
       const user = await User.findOne({
-        emailVerificationToken: token,
-        emailVerificationExpires: { $gt: Date.now() }
+        verificationPin: token,
+        verificationPinExpires: { $gt: Date.now() }
       });
 
       if (!user) {
         return res.status(400).json({ 
-          message: 'Email verification token is invalid or has expired' 
+          message: 'Verification code is invalid or has expired' 
         });
       }
 
       // Update user as verified
       user.isEmailVerified = true;
-      user.emailVerificationToken = null;
-      user.emailVerificationExpires = null;
+      user.verificationPin = null;
+      user.verificationPinExpires = null;
       await user.save();
 
       // Create JWT token

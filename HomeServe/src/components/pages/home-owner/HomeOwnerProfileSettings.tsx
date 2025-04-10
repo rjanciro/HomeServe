@@ -27,7 +27,9 @@ const Settings: React.FC = () => {
     barangay: '',
     cityMunicipality: '',
     province: '',
-    zipCode: ''
+    zipCode: '',
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined
   });
   
   // State for profile image
@@ -58,6 +60,8 @@ const Settings: React.FC = () => {
         cityMunicipality: user.cityMunicipality || '',
         province: user.province || '',
         zipCode: user.zipCode || '',
+        latitude: user.latitude,
+        longitude: user.longitude
       });
       
       if (user.profileImage) {
@@ -85,6 +89,8 @@ const Settings: React.FC = () => {
             cityMunicipality: updatedUser.cityMunicipality || '',
             province: updatedUser.province || '',
             zipCode: updatedUser.zipCode || '',
+            latitude: updatedUser.latitude,
+            longitude: updatedUser.longitude
           });
           
           if (updatedUser.profileImage) {
@@ -115,7 +121,17 @@ const Settings: React.FC = () => {
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      // Check file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        toast.error('File is too large. Maximum size is 10MB.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
+      setSelectedFile(file);
       
       // Show preview of selected image
       const reader = new FileReader();
@@ -124,7 +140,7 @@ const Settings: React.FC = () => {
           setProfileImage(event.target.result as string);
         }
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -172,15 +188,36 @@ const Settings: React.FC = () => {
   };
 
   // Handle profile update from modal
-  const handleProfileUpdate = async (updatedData: typeof profileForm) => {
+  const handleProfileUpdate = async (updatedData: {
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    email: string;
+    phone: string;
+    houseNumber: string;
+    streetName: string;
+    barangay: string;
+    cityMunicipality: string;
+    province: string;
+    zipCode: string;
+  }) => {
     try {
+      // Add latitude and longitude from current state before sending to API
+      const dataToUpdate = {
+        ...updatedData,
+        latitude: profileForm.latitude,
+        longitude: profileForm.longitude
+      };
+      
       // Update profile using the profileService
-      const response = await profileService.updateProfile(updatedData);
+      const response = await profileService.updateProfile(dataToUpdate);
       
       // Update form data with response
       setProfileForm(prevData => ({
         ...prevData,
-        ...updatedData
+        ...updatedData,
+        latitude: profileForm.latitude,
+        longitude: profileForm.longitude
       }));
       
       // Update user in localStorage
@@ -188,7 +225,9 @@ const Settings: React.FC = () => {
       if (user) {
         const updatedUser = {
           ...user,
-          ...updatedData
+          ...updatedData,
+          latitude: profileForm.latitude,
+          longitude: profileForm.longitude
         };
         
         localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -209,7 +248,7 @@ const Settings: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <FaSpinner className="text-green-500 text-3xl animate-spin" />
+        <FaSpinner className="text-[#133E87] text-3xl animate-spin" />
       </div>
     );
   }
@@ -242,7 +281,7 @@ const Settings: React.FC = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-2 text-center w-full">
-            Click on the image to upload a new profile picture. Max size: 5MB.
+            Click on the image to upload a new profile picture. Max size: 10MB.
           </p>
         </div>
         
@@ -258,14 +297,14 @@ const Settings: React.FC = () => {
         {selectedFile && !isUploading && (
           <button
             onClick={handleUpload}
-            className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+            className="mt-4 px-4 py-2 bg-[#133E87] text-white rounded-md hover:bg-[#0f2f66] transition-colors"
           >
             Upload New Picture
           </button>
         )}
         
         {isUploading && (
-          <div className="mt-2 flex items-center justify-center text-blue-500">
+          <div className="mt-2 flex items-center justify-center text-[#133E87]">
             <FaSpinner className="animate-spin mr-2" />
             <span>Uploading...</span>
           </div>
@@ -276,11 +315,11 @@ const Settings: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">
-            <FaUser className="text-green-500 mr-2" />
+            <FaUser className="text-[#133E87] mr-2" />
             <h2 className="text-xl font-semibold">Personal Information</h2>
           </div>
           <button 
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center"
+            className="px-4 py-2 bg-[#133E87] text-white rounded-md hover:bg-[#0f2f66] transition-colors flex items-center"
             onClick={() => setIsEditProfileModalOpen(true)}
           >
             <FaEdit className="mr-2" />
@@ -323,7 +362,7 @@ const Settings: React.FC = () => {
                 <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50">
                   {profileForm.email || 'Not provided'}
                   {user?.isEmailVerified ? (
-                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E6EBF4] text-[#133E87]">
                       Verified
                     </span>
                   ) : (
@@ -396,8 +435,8 @@ const Settings: React.FC = () => {
       {/* Security Section */}
       <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="bg-green-100 p-3 rounded-lg">
-            <FaLock className="w-5 h-5 text-green-600" />
+          <div className="bg-[#E6EBF4] p-3 rounded-lg">
+            <FaLock className="w-5 h-5 text-[#133E87]" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Security</h2>
@@ -407,7 +446,7 @@ const Settings: React.FC = () => {
         
         <button
           onClick={handleChangePasswordClick}
-          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+          className="px-4 py-2 bg-[#133E87] text-white rounded-md hover:bg-[#0f2f66] transition-colors"
         >
           Change Password
         </button>

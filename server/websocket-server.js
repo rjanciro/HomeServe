@@ -23,7 +23,7 @@ const startWebSocketServer = () => {
     // Welcome message
     ws.send(JSON.stringify({
       type: 'welcome',
-      message: 'Connected to HomeServeConnect WebSocket server',
+      message: 'Connected to HomeServe WebSocket server',
       messageId: `welcome-${Date.now()}`
     }));
 

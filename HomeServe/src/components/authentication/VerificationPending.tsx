@@ -1,16 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/auth.service';
 
 const VerificationPending = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || '';
   const [pin, setPin] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('');
   const [resendStatus, setResendStatus] = useState('');
+  
+  // Get email from location state or localStorage
+  const emailFromState = location.state?.email || '';
+  const [email, setEmail] = useState(emailFromState);
+  
+  useEffect(() => {
+    // If no email in location state, try to get from localStorage
+    if (!emailFromState) {
+      const storedEmail = localStorage.getItem('pendingVerificationEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      } else {
+        // No email found, redirect to login
+        navigate('/login');
+      }
+    } else {
+      // Store email in localStorage for future use
+      localStorage.setItem('pendingVerificationEmail', emailFromState);
+    }
+  }, [emailFromState, navigate]);
 
   const handleVerifyPin = async () => {
     if (!email || !pin || pin.length !== 6) {
@@ -24,6 +43,9 @@ const VerificationPending = () => {
     try {
       const response = await authService.verifyPin(email, pin);
       setVerificationStatus('success');
+      
+      // Clear the pending verification email
+      localStorage.removeItem('pendingVerificationEmail');
       
       // Redirect after a short delay
       setTimeout(() => {

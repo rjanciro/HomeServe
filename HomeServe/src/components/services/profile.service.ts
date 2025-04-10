@@ -8,14 +8,34 @@ export const profileService = {
     const formData = new FormData();
     formData.append('profileImage', file);
     
-    const response = await axios.post(`${API_URL}/profile/upload-image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    try {
+      // Log file details for debugging
+      console.log('Uploading file:', {
+        name: file.name,
+        type: file.type,
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+      });
+      
+      const response = await axios.post(`${API_URL}/profile/upload-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      console.log('Upload response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Upload error details:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Server response:', error.response.data);
+        // Check if error is about file size
+        if (error.response.data.includes('File too large')) {
+          throw new Error('File is too large. Maximum size is 10MB.');
+        }
       }
-    });
-    
-    return response.data;
+      throw error;
+    }
   },
   
   async updateProfile(profileData: any) {

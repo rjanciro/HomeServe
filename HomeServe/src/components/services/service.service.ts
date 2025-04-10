@@ -37,14 +37,14 @@ export interface Service {
   isAvailable: boolean;
   contactNumber: string;
   image?: string;
-  provider?: string;
+  housekeeper?: string;
   createdAt?: string;
 }
 
 export const serviceService = {
-  // Get all services for the logged-in provider
+  // Get all services for the logged-in housekeeper
   async getMyServices() {
-    const response = await axios.get(`${API_URL}/services/provider`, {
+    const response = await axios.get(`${API_URL}/services/housekeeper`, {
       headers: getAuthHeader()
     });
     return response.data;

@@ -383,7 +383,7 @@ const VerificationDocumentsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Service Provider Verification</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Housekeeper Verification</h1>
         <p className="text-gray-600 mt-2">
           To complete your verification, please upload the required documents. Make sure all files are clear and meet the format guidelines.
         </p>

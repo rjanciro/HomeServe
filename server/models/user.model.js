@@ -146,6 +146,14 @@ const HousekeeperSchema = User.discriminator('housekeeper', new Schema({
     type: String,
     default: null
   },
+  latitude: {
+    type: Number,
+    default: null
+  },
+  longitude: {
+    type: Number,
+    default: null
+  },
   address: {
     type: Object,
     default: function() {
@@ -155,7 +163,9 @@ const HousekeeperSchema = User.discriminator('housekeeper', new Schema({
         barangay: this.barangay,
         cityMunicipality: this.cityMunicipality,
         province: this.province,
-        zipCode: this.zipCode
+        zipCode: this.zipCode,
+        latitude: this.latitude,
+        longitude: this.longitude
       };
     }
   },
@@ -236,6 +246,14 @@ const HomeownerSchema = User.discriminator('homeowner', new Schema({
     type: String,
     default: null
   },
+  latitude: {
+    type: Number,
+    default: null
+  },
+  longitude: {
+    type: Number,
+    default: null
+  },
   address: {
     type: Object,
     default: function() {
@@ -245,7 +263,9 @@ const HomeownerSchema = User.discriminator('homeowner', new Schema({
         barangay: this.barangay,
         cityMunicipality: this.cityMunicipality,
         province: this.province,
-        zipCode: this.zipCode
+        zipCode: this.zipCode,
+        latitude: this.latitude,
+        longitude: this.longitude
       };
     }
   }

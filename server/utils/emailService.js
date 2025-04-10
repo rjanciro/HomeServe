@@ -21,19 +21,20 @@ exports.sendVerificationEmail = async (email, pin) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Email Verification - HomeServeConnect',
+      subject: 'Email Verification - HomeServe',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Welcome to HomeServeConnect!</h2>
+          <h2>Welcome to HomeServe!</h2>
           <p>Thank you for registering. Please verify your email address using the verification code below:</p>
           
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; border-radius: 5px;">
             <h1 style="font-size: 32px; letter-spacing: 5px; color: #4CAF50; margin: 0;">${pin}</h1>
           </div>
           
+          <p>Enter this code in the verification screen to complete your registration.</p>
           <p>This verification code will expire in 1 hour.</p>
           <p>If you didn't request this code, please ignore this email.</p>
-          <p>Thank you,<br>The HomeServeConnect Team</p>
+          <p>Thank you,<br>The HomeServe Team</p>
         </div>
       `,
     };
@@ -72,7 +73,7 @@ exports.sendPasswordChangePinEmail = async (email, pin) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Password Change Request - HomeServeConnect',
+      subject: 'Password Change Request - HomeServe',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Password Change Request</h2>
@@ -84,7 +85,7 @@ exports.sendPasswordChangePinEmail = async (email, pin) => {
           
           <p>This verification code will expire in 1 hour.</p>
           <p>If you didn't request this code, please ignore this email or contact support if you believe this is suspicious.</p>
-          <p>Thank you,<br>The HomeServeConnect Team</p>
+          <p>Thank you,<br>The HomeServe Team</p>
         </div>
       `,
     };

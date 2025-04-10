@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
-import { FaHome, FaBriefcase, FaTools, FaComments, FaUser, FaBars, FaSignOutAlt, FaCog } from 'react-icons/fa';
+import { FaHome, FaBriefcase, FaClipboardList, FaComments, FaUser, FaBars, FaSignOutAlt, FaCalendarCheck, FaTools } from 'react-icons/fa';
 import { authService } from '../services/auth.service';
 import { User } from '../../types';
 import Swal from 'sweetalert2';
 import { profileEvents } from '../../utils/events';
 import { profileService } from '../services/profile.service';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const HousekeeperSidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -52,7 +52,7 @@ const HousekeeperSidebar: React.FC = () => {
       text: "You will be logged out of your account",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3B82F6',
+      confirmButtonColor: '#137D13',
       cancelButtonColor: '#EF4444',
       confirmButtonText: 'Yes, logout',
       cancelButtonText: 'Cancel'
@@ -60,13 +60,7 @@ const HousekeeperSidebar: React.FC = () => {
       if (result.isConfirmed) {
         authService.logout();
         navigate('/login');
-        Swal.fire({
-          title: 'Logged Out!',
-          text: 'You have been successfully logged out',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false
-        });
+        toast.success('Successfully logged out');
       }
     });
   };
@@ -74,8 +68,9 @@ const HousekeeperSidebar: React.FC = () => {
   const getNavItems = () => {
     return [
       { path: '/housekeeper-dashboard', icon: FaHome, label: 'Dashboard' },
-      { path: '/housekeeper/booking-requests', icon: FaBriefcase, label: 'Booking Requests' },
       { path: '/housekeeper/my-services', icon: FaTools, label: 'My Services' },
+      { path: '/housekeeper/booking-requests', icon: FaCalendarCheck, label: 'Booking Requests' },
+      { path: '/housekeeper/job-applications', icon: FaClipboardList, label: 'Job Applications' },
       { path: '/housekeeper/messages', icon: FaComments, label: 'Messages' },
       { path: '/housekeeper/profile', icon: FaUser, label: 'Profile' },
     ];
@@ -89,13 +84,13 @@ const HousekeeperSidebar: React.FC = () => {
         <div className="border-b border-gray-200 h-[73px]">
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`w-full h-full hover:bg-gray-100 text-gray-600 flex items-center ${
+            className={`w-full h-full hover:bg-gray-100 text-[#137D13] flex items-center ${
               isCollapsed ? 'justify-center' : 'px-4'
             }`}
           >
             <FaBars size={20} />
             {!isCollapsed && (
-              <span className="ml-3 font-semibold text-gray-800">Home Serve | Housekeeper</span>
+              <span className="ml-3 font-semibold text-[#137D13]">HomeServe</span>
             )}
           </button>
         </div>
@@ -108,8 +103,8 @@ const HousekeeperSidebar: React.FC = () => {
                   className={`flex items-center py-3 transition-all duration-300
                     ${isCollapsed ? 'justify-center px-0' : 'px-7'} 
                     ${isActive(path) 
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-[#E6F4E6] text-[#137D13]'
+                      : 'text-gray-600 hover:bg-[#F0FAF0] hover:text-[#137D13]'
                     }`}
                 >
                   <Icon className={`w-5 h-5`} />
@@ -122,7 +117,7 @@ const HousekeeperSidebar: React.FC = () => {
         <div className="border-t border-gray-200">
           <button
             onClick={handleLogout}
-            className={`w-full py-4 text-gray-600 hover:bg-gray-50 flex items-center transition-colors ${
+            className={`w-full py-4 text-red-600 hover:bg-red-50 flex items-center transition-colors ${
               isCollapsed ? 'justify-center' : 'px-7'
             }`}
           >
@@ -140,7 +135,7 @@ const HousekeeperSidebar: React.FC = () => {
                   ? profileService.getFullImageUrl(user.profileImage) 
                   : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
                 alt="Profile"
-                className="w-10 h-10 rounded-full ring-2 ring-gray-100"
+                className="w-10 h-10 rounded-full ring-2 ring-[#137D13]"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";

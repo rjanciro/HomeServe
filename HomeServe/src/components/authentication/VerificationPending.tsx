@@ -50,7 +50,7 @@ const VerificationPending = () => {
       // Redirect after a short delay
       setTimeout(() => {
         const user = authService.getCurrentUser();
-        navigate(`/${user?.userType === 'homeowner' ? 'homeowner' : 'provider'}/dashboard`);
+        navigate(`/${user?.userType === 'homeowner' ? 'homeowner' : 'housekeeper'}/dashboard`);
       }, 2000);
     } catch (error) {
       console.error('Error verifying PIN:', error);

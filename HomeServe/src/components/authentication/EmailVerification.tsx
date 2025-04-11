@@ -21,7 +21,7 @@ const EmailVerification = () => {
         
         setTimeout(() => {
           const user = authService.getCurrentUser();
-          navigate(`/${user?.userType === 'homeowner' ? 'homeowner' : 'provider'}/dashboard`);
+          navigate(`/${user?.userType === 'homeowner' ? 'homeowner' : 'housekeeper'}/dashboard`);
         }, 3000);
       } catch (error) {
         console.error('Verification error:', error);

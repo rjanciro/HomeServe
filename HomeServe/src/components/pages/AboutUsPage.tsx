@@ -111,7 +111,7 @@ const AboutUsPage: React.FC = () => {
                 As part of my Bachelor of Science in Information Technology program, I was tasked with creating a solution that addresses a significant market need and demonstrates my technical and business skills.
               </p>
               <p className="text-gray-600">
-                After researching various industries, I identified the housekeeping sector as one that could greatly benefit from technological innovation and a more streamlined approach to connecting service providers with homeowners.
+                After researching various industries, I identified the housekeeping sector as one that could greatly benefit from technological innovation and a more streamlined approach to connecting housekeepers with homeowners.
               </p>
             </div>
             

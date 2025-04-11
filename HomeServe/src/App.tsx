@@ -42,7 +42,6 @@ import VerificationPending from './components/authentication/VerificationPending
 import { MessagingProvider } from './contexts/MessagingContext';
 import UsersServiceProvidersPage from './components/pages/admin/user-management/UsersServiceProviders';
 import ProviderVerificationDetailsPage from './components/pages/admin/user-management/ProviderVerificationDetails';
-// import MyServices from './components/pages/service-provider/MyServices';
 import VerificationDocumentsPage from './components/pages/housekeeper/VerificationDocuments';
 
 

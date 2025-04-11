@@ -3,13 +3,13 @@ import { FaCalendar, FaTools, FaStar, FaUserClock, FaChartLine } from 'react-ico
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 
 interface User {
-  userType: 'homeowner' | 'provider';
+  userType: 'homeowner' | 'housekeeper';
   firstName: string;
   lastName: string;
 }
 
-const ProviderDashboard: React.FC = () => {
-  useDocumentTitle('Provider Dashboard');
+const HousekeeperDashboard: React.FC = () => {
+  useDocumentTitle('Housekeeper Dashboard');
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -109,4 +109,4 @@ const ProviderDashboard: React.FC = () => {
   );
 };
 
-export default ProviderDashboard;
+export default HousekeeperDashboard;

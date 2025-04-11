@@ -90,7 +90,7 @@ const AdminSidebar: React.FC = () => {
         label: 'User Management',
         subItems: [
           { path: '/admin/users/homeowners', icon: FaUserEdit, label: 'Homeowners' },
-          { path: '/admin/service-providers', icon: FaUserCheck, label: 'Service Providers' },
+          { path: '/admin/users/housekeepers', icon: FaUserCheck, label: 'Housekeepers' },
           { path: '/admin/users/admins', icon: FaUserTie, label: 'Admins' }
         ]
       },

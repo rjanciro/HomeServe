@@ -395,16 +395,40 @@ const HousekeeperProfileSettings: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <FaBriefcase className="mr-2 text-green-600" /> Experience
                 </label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                  {formData.experience || 'Not provided'}
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner min-h-[50px]">
+                  {formData.experience ? (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.experience.split(',').map((tag, index) => (
+                        tag.trim() && (
+                          <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
+                            {tag.trim()}
+                          </span>
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    'Not provided'
+                  )}
                 </div>
               </div>
               <div className="text-left">
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   <FaTools className="mr-2 text-green-600" /> Specialties
                 </label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                  {formData.specialties || 'Not provided'}
+                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner min-h-[50px]">
+                  {formData.specialties ? (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.specialties.split(',').map((tag, index) => (
+                        tag.trim() && (
+                          <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
+                            {tag.trim()}
+                          </span>
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    'Not provided'
+                  )}
                 </div>
               </div>
             </div>

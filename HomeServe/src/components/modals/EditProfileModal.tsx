@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaTimes, FaSpinner, FaBriefcase, FaTools, FaPhone, FaEnvelope } from 'react-icons/fa';
+import React, { useState, useEffect, KeyboardEvent } from 'react';
+import { FaTimes, FaSpinner, FaBriefcase, FaTools, FaPhone, FaEnvelope, FaTimes as FaClose } from 'react-icons/fa';
 
 export interface EditProfileModalProps {
   isOpen: boolean;
@@ -26,6 +26,14 @@ export interface EditProfileModalProps {
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, formData, onSave }) => {
   const [editFormData, setEditFormData] = useState({ ...formData });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Tags state
+  const [experienceTags, setExperienceTags] = useState<string[]>([]);
+  const [specialtyTags, setSpecialtyTags] = useState<string[]>([]);
+  
+  // Tag input state
+  const [experienceInput, setExperienceInput] = useState('');
+  const [specialtyInput, setSpecialtyInput] = useState('');
 
   // Update local form data when parent formData changes
   useEffect(() => {
@@ -51,8 +59,32 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
         ...formData,
         phone: updatedPhone
       });
+      
+      // Initialize tags from string values if they exist
+      if (formData.experience) {
+        const expTags = formData.experience.split(',').map(tag => tag.trim()).filter(tag => tag);
+        setExperienceTags(expTags);
+      } else {
+        setExperienceTags([]);
+      }
+      
+      if (formData.specialties) {
+        const specTags = formData.specialties.split(',').map(tag => tag.trim()).filter(tag => tag);
+        setSpecialtyTags(specTags);
+      } else {
+        setSpecialtyTags([]);
+      }
     }
   }, [formData, isOpen]);
+  
+  // Update string form data fields when tags change
+  useEffect(() => {
+    setEditFormData(prev => ({
+      ...prev,
+      experience: experienceTags.join(', '),
+      specialties: specialtyTags.join(', ')
+    }));
+  }, [experienceTags, specialtyTags]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -105,6 +137,51 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
         ...editFormData,
         [name]: value
       });
+    }
+  };
+  
+  // Tag handling functions
+  const handleExperienceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExperienceInput(e.target.value);
+  };
+  
+  const handleSpecialtyInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSpecialtyInput(e.target.value);
+  };
+  
+  const addExperienceTag = () => {
+    if (experienceInput.trim() !== '') {
+      setExperienceTags([...experienceTags, experienceInput.trim()]);
+      setExperienceInput('');
+    }
+  };
+  
+  const addSpecialtyTag = () => {
+    if (specialtyInput.trim() !== '') {
+      setSpecialtyTags([...specialtyTags, specialtyInput.trim()]);
+      setSpecialtyInput('');
+    }
+  };
+  
+  const removeExperienceTag = (index: number) => {
+    setExperienceTags(experienceTags.filter((_, i) => i !== index));
+  };
+  
+  const removeSpecialtyTag = (index: number) => {
+    setSpecialtyTags(specialtyTags.filter((_, i) => i !== index));
+  };
+  
+  const handleExperienceKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addExperienceTag();
+    }
+  };
+  
+  const handleSpecialtyKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addSpecialtyTag();
     }
   };
 
@@ -217,114 +294,157 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
             
             {/* Conditional fields based on user type */}
             {isHousekeeper && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <>
                 <div className="text-left">
                   <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                     <FaBriefcase className="mr-2 text-green-600" /> Experience
                   </label>
-                  <input
-                    id="experience"
-                    type="text"
-                    name="experience"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.experience || ''}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 3 years of housekeeping"
-                  />
+                  <div className="flex items-center">
+                    <input
+                      id="experience"
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                      value={experienceInput}
+                      onChange={handleExperienceInputChange}
+                      onKeyDown={handleExperienceKeyDown}
+                      placeholder="Add experience and press Enter"
+                    />
+                    <button
+                      type="button"
+                      onClick={addExperienceTag}
+                      className="ml-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {experienceTags.map((tag, index) => (
+                      <div key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full flex items-center">
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeExperienceTag(index)}
+                          className="ml-1 text-green-700 hover:text-green-900"
+                        >
+                          <FaClose size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+                
                 <div className="text-left">
                   <label htmlFor="specialties" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                     <FaTools className="mr-2 text-green-600" /> Specialties
                   </label>
-                  <input
-                    id="specialties"
-                    type="text"
-                    name="specialties"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.specialties || ''}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Cleaning, Cooking, Child Care"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Separate multiple specialties with commas</p>
+                  <div className="flex items-center">
+                    <input
+                      id="specialties"
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                      value={specialtyInput}
+                      onChange={handleSpecialtyInputChange}
+                      onKeyDown={handleSpecialtyKeyDown}
+                      placeholder="Add specialty and press Enter"
+                    />
+                    <button
+                      type="button"
+                      onClick={addSpecialtyTag}
+                      className="ml-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {specialtyTags.map((tag, index) => (
+                      <div key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full flex items-center">
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeSpecialtyTag(index)}
+                          className="ml-1 text-green-700 hover:text-green-900"
+                        >
+                          <FaClose size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </>
             )}
             
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Address Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="text-left">
-                  <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-700 mb-1">House/Building Number</label>
-                  <input
-                    id="houseNumber"
-                    type="text"
-                    name="houseNumber"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.houseNumber}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="text-left">
-                  <label htmlFor="streetName" className="block text-sm font-medium text-gray-700 mb-1">Street Name</label>
-                  <input
-                    id="streetName"
-                    type="text"
-                    name="streetName"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.streetName}
-                    onChange={handleInputChange}
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="text-left">
+                <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-700 mb-1">House/Building Number</label>
+                <input
+                  id="houseNumber"
+                  type="text"
+                  name="houseNumber"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={editFormData.houseNumber}
+                  onChange={handleInputChange}
+                />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="text-left">
-                  <label htmlFor="barangay" className="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
-                  <input
-                    id="barangay"
-                    type="text"
-                    name="barangay"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.barangay}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="text-left">
-                  <label htmlFor="cityMunicipality" className="block text-sm font-medium text-gray-700 mb-1">City/Municipality</label>
-                  <input
-                    id="cityMunicipality"
-                    type="text"
-                    name="cityMunicipality"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.cityMunicipality}
-                    onChange={handleInputChange}
-                  />
-                </div>
+              <div className="text-left">
+                <label htmlFor="streetName" className="block text-sm font-medium text-gray-700 mb-1">Street Name</label>
+                <input
+                  id="streetName"
+                  type="text"
+                  name="streetName"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={editFormData.streetName}
+                  onChange={handleInputChange}
+                />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-left">
-                  <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">Province</label>
-                  <input
-                    id="province"
-                    type="text"
-                    name="province"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.province}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="text-left">
-                  <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
-                  <input
-                    id="zipCode"
-                    type="text"
-                    name="zipCode"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                    value={editFormData.zipCode}
-                    onChange={handleInputChange}
-                  />
-                </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="text-left">
+                <label htmlFor="barangay" className="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
+                <input
+                  id="barangay"
+                  type="text"
+                  name="barangay"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={editFormData.barangay}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="text-left">
+                <label htmlFor="cityMunicipality" className="block text-sm font-medium text-gray-700 mb-1">City/Municipality</label>
+                <input
+                  id="cityMunicipality"
+                  type="text"
+                  name="cityMunicipality"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={editFormData.cityMunicipality}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="text-left">
+                <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                <input
+                  id="province"
+                  type="text"
+                  name="province"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={editFormData.province}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="text-left">
+                <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                <input
+                  id="zipCode"
+                  type="text"
+                  name="zipCode"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={editFormData.zipCode}
+                  onChange={handleInputChange}
+                />
               </div>
             </div>
             
@@ -334,14 +454,14 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
                 id="bio"
                 name="bio"
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 value={editFormData.bio}
                 onChange={handleInputChange}
-                placeholder="Write a short description about yourself, your skills, and your experience..."
+                placeholder="Tell us about yourself"
               ></textarea>
             </div>
             
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end mt-6 gap-3">
               <button
                 type="button"
                 onClick={onClose}
@@ -352,7 +472,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

@@ -33,6 +33,38 @@ const authController = {
       let user = await User.findOne({ email });
       if (user) {
         console.log('User already exists:', email);
+        
+        // Check if the user exists but is not verified
+        if (!user.isEmailVerified) {
+          console.log('User exists but is not verified:', email);
+          
+          // Generate a new verification PIN
+          const verificationPin = Math.floor(100000 + Math.random() * 900000).toString();
+          const verificationPinExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+          
+          // Update the user with new verification PIN
+          user.verificationPin = verificationPin;
+          user.verificationPinExpires = verificationPinExpires;
+          await user.save();
+          
+          // Send new verification email
+          try {
+            const emailSent = await sendVerificationEmail(email, verificationPin);
+            if (emailSent) {
+              console.log(`New verification email sent to unverified user: ${email}`);
+            }
+          } catch (emailError) {
+            console.error('Error sending verification email:', emailError);
+          }
+          
+          return res.status(400).json({ 
+            message: 'This account exists but is not verified', 
+            needsVerification: true,
+            email: email
+          });
+        }
+        
+        // Regular user exists case
         return res.status(400).json({ message: 'User already exists' });
       }
 

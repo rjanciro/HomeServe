@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
 
     try {
       // Login and get complete user data
-      await authService.login(email, password, userType);
+      const response = await authService.login(email, password, userType);
       
       // Make sure we have the complete profile
       await authService.fetchUserProfile();
@@ -34,6 +34,24 @@ const LoginPage: React.FC = () => {
       navigate(dashboardPath);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
+        // Check if this is an unverified email error
+        if (err.response.data.needsVerification) {
+          // Store email in localStorage
+          localStorage.setItem('pendingVerificationEmail', email);
+          
+          // Request a new verification code
+          try {
+            await authService.resendVerificationEmail(email);
+            toast.success('A new verification code has been sent to your email');
+          } catch (resendError) {
+            console.error('Failed to send verification code:', resendError);
+          }
+          
+          // toast.error('Please verify your email before logging in');
+          // Redirect to verification pending page with email
+          navigate('/verification-pending', { state: { email: email } });
+          return;
+        }
         toast.error(err.response.data.message || 'Login failed');
       } else {
         toast.error('An unexpected error occurred');

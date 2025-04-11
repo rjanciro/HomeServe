@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/auth.service';
+import toast from 'react-hot-toast';
 
 const VerificationPending = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const VerificationPending = () => {
         setEmail(storedEmail);
       } else {
         // No email found, redirect to login
+        toast.error('No email found for verification. Please try logging in again.');
         navigate('/login');
       }
     } else {
@@ -34,6 +36,7 @@ const VerificationPending = () => {
   const handleVerifyPin = async () => {
     if (!email || !pin || pin.length !== 6) {
       setVerificationStatus('error');
+      toast.error('Please enter a valid 6-digit verification code');
       return;
     }
 
@@ -43,6 +46,7 @@ const VerificationPending = () => {
     try {
       const response = await authService.verifyPin(email, pin);
       setVerificationStatus('success');
+      toast.success('Email verified successfully!');
       
       // Clear the pending verification email
       localStorage.removeItem('pendingVerificationEmail');
@@ -50,11 +54,12 @@ const VerificationPending = () => {
       // Redirect after a short delay
       setTimeout(() => {
         const user = authService.getCurrentUser();
-        navigate(`/${user?.userType === 'homeowner' ? 'homeowner' : 'housekeeper'}/dashboard`);
+        navigate(`/${user?.userType === 'homeowner' ? 'dashboard' : 'housekeeper-dashboard'}`);
       }, 2000);
     } catch (error) {
       console.error('Error verifying PIN:', error);
       setVerificationStatus('error');
+      toast.error('Invalid or expired verification code');
     } finally {
       setIsVerifying(false);
     }
@@ -63,6 +68,7 @@ const VerificationPending = () => {
   const handleResendEmail = async () => {
     if (!email) {
       setResendStatus('error');
+      toast.error('Email address is missing');
       return;
     }
 
@@ -72,9 +78,11 @@ const VerificationPending = () => {
     try {
       await authService.resendVerificationEmail(email);
       setResendStatus('success');
+      toast.success('Verification code has been sent to your email');
     } catch (error) {
       console.error('Error resending verification email:', error);
       setResendStatus('error');
+      toast.error('Failed to resend verification code');
     } finally {
       setIsResending(false);
     }

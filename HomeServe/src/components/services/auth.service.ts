@@ -70,25 +70,46 @@ export const authService = {
     // Map userType for backend
     const backendUserType = userType === 'housekeeper' ? 'housekeeper' : userType;
     
-    const response = await axios.post(`${API_URL}/auth/login`, {
-      email,
-      password,
-      userType: backendUserType
-    });
-    
-    // Store the token
-    localStorage.setItem('token', response.data.token);
-    
-    // Get complete user profile with all fields after successful login
-    const userProfile = await this.fetchUserProfile();
-    
-    // Ensure the frontend user type is preserved
-    if (userProfile && backendUserType === 'housekeeper') {
-      userProfile.userType = 'housekeeper';
-      localStorage.setItem('user', JSON.stringify(userProfile));
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email,
+        password,
+        userType: backendUserType
+      });
+      
+      // Check if server indicates this is an unverified account
+      if (response.data.needsVerification) {
+        throw {
+          response: {
+            data: {
+              message: 'Please verify your email before logging in',
+              needsVerification: true,
+              email: email
+            }
+          }
+        };
+      }
+      
+      // Store the token
+      localStorage.setItem('token', response.data.token);
+      
+      // Get complete user profile with all fields after successful login
+      const userProfile = await this.fetchUserProfile();
+      
+      // Ensure the frontend user type is preserved
+      if (userProfile && backendUserType === 'housekeeper') {
+        userProfile.userType = 'housekeeper';
+        localStorage.setItem('user', JSON.stringify(userProfile));
+      }
+      
+      return userProfile;
+    } catch (error) {
+      // If the server directly returned needsVerification, propagate it
+      if (axios.isAxiosError(error) && error.response?.data?.needsVerification) {
+        throw error;
+      }
+      throw error;
     }
-    
-    return userProfile;
   },
 
   logout() {
@@ -182,6 +203,9 @@ export const authService = {
 
   async resendVerificationEmail(email: string) {
     try {
+      // Store email in localStorage to retain it across page refreshes
+      localStorage.setItem('pendingVerificationEmail', email);
+      
       const response = await axios.post(`${API_URL}/auth/resend-verification`, { email });
       return response.data;
     } catch (error) {

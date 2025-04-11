@@ -84,6 +84,15 @@ const RegisterPage: React.FC = () => {
         console.log('Error status:', err.response.status);
         console.log('Error data:', err.response.data);
         
+        // Check if this is a user exists error but the account is unverified
+        if (err.response.data.needsVerification) {
+          setError('This account exists but is not verified. Redirecting to verification page...');
+          setTimeout(() => {
+            navigate('/verification-pending', { state: { email: formData.email } });
+          }, 1500);
+          return;
+        }
+        
         if (err.response.data.errors && err.response.data.errors.length > 0) {
           console.log('Validation errors:', err.response.data.errors);
           
@@ -94,7 +103,12 @@ const RegisterPage: React.FC = () => {
           
           setError(errorMessages);
         } else if (err.response.data.message) {
-          setError(err.response.data.message);
+          // Check if this is a "User already exists" error
+          if (err.response.data.message === 'User already exists') {
+            setError('An account with this email already exists. Please try logging in instead.');
+          } else {
+            setError(err.response.data.message);
+          }
         } else {
           setError(`Registration failed: ${err.response.status} - ${err.response.statusText}`);
         }

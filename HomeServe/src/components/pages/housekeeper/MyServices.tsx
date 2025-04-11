@@ -64,7 +64,8 @@ const MyServicesPage: React.FC = () => {
           (status === 'approved' || 
           status === 'verified' || 
           user.isVerified === true) && 
-          isActive;
+          isActive &&
+          status !== 'pending';
         
         setIsVerified(verified);
         
@@ -140,9 +141,10 @@ const MyServicesPage: React.FC = () => {
       // Set isVerified based on the combined status
       // Important: Consider "approved" status as verified even if isVerified flag is false
       const verified = 
-        status === 'approved' || 
+        (status === 'approved' || 
         status === 'verified' || 
-        user.isVerified === true;
+        user.isVerified === true) &&
+        status !== 'pending';
       
       console.log('Verification check:', {
         status,

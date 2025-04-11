@@ -10,7 +10,7 @@ router.use(auth);
 // Get all available services for homeowners
 router.get('/', serviceController.getAllServices);
 
-// Get all services for the logged-in provider/housekeeper
+// Get all services for the logged-in housekeeper
 router.get('/housekeeper', serviceController.getHousekeeperServices);
 
 // Create a new service - add file upload middleware

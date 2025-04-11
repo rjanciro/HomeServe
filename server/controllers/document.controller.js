@@ -44,19 +44,19 @@ exports.uploadDocument = async (req, res) => {
     const userId = req.user.id;
     
     // Validate document type
-    const validDocTypes = ['businessRegistration', 'representativeId', 'professionalLicenses', 'portfolio'];
+    const validDocTypes = ['identificationCard', 'certifications'];
     if (!validDocTypes.includes(docType)) {
       return res.status(400).json({ message: 'Invalid document type' });
     }
     
-    // Check if user exists and is a service provider
+    // Check if user exists and is a housekeeper
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    if (user.userType !== 'provider') {
-      return res.status(403).json({ message: 'Only service providers can upload verification documents' });
+    if (user.userType !== 'housekeeper') {
+      return res.status(403).json({ message: 'Only housekeepers can upload verification documents' });
     }
     
     // Process file upload
@@ -191,8 +191,8 @@ exports.resubmitDocuments = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    if (user.userType !== 'provider') {
-      return res.status(403).json({ message: 'Only service providers can resubmit documents' });
+    if (user.userType !== 'housekeeper') {
+      return res.status(403).json({ message: 'Only housekeepers can resubmit documents' });
     }
     
     // Check if the user's documents were rejected
@@ -235,7 +235,7 @@ exports.deleteDocument = async (req, res) => {
     const { docType, fileId } = req.params;
     
     // Validate document type
-    const validDocTypes = ['businessRegistration', 'representativeId', 'professionalLicenses', 'portfolio'];
+    const validDocTypes = ['identificationCard', 'certifications'];
     if (!validDocTypes.includes(docType)) {
       return res.status(400).json({ message: 'Invalid document type' });
     }

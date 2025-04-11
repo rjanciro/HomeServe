@@ -7,36 +7,37 @@ export const documentService = {
   // Upload verification document
   async uploadDocument(docType: string, formData: FormData) {
     // Validate docType is one of the allowed types
-    const validDocTypes = ['businessRegistration', 'representativeId', 'professionalLicenses', 'portfolio'];
+    const validDocTypes = ['identificationCard', 'certifications'];
     if (!validDocTypes.includes(docType)) {
       throw new Error('Invalid document type');
     }
     
-    // Create a new FormData with the correct field name
-    const correctedFormData = new FormData();
-    
-    // Get the file from the original formData (assuming it contains a "document" field)
+    // Get the file from the original formData
     const file = formData.get('document');
     
-    if (file) {
-      // Add it with the correct field name that server expects
-      correctedFormData.append('documents', file);
-      
-      // Copy any other fields that might be in the formData
-      for (const [key, value] of formData.entries()) {
-        if (key !== 'document') {
-          correctedFormData.append(key, value);
-        }
-      }
+    if (!file) {
+      throw new Error('No file provided');
     }
     
-    const response = await axios.post(`${API_URL}/upload/${docType}`, correctedFormData, {
-      headers: {
-        ...getAuthHeader(),
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return response.data;
+    // Create a new FormData with the correct field name that the server expects
+    const correctedFormData = new FormData();
+    
+    // The server expects 'documents' as the field name, not 'document'
+    correctedFormData.append('documents', file as Blob);
+    
+    try {
+      const response = await axios.post(`${API_URL}/upload/${docType}`, correctedFormData, {
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error uploading ${docType} document:`, error);
+      throw error;
+    }
   },
   
   // Get document verification status
@@ -68,7 +69,7 @@ export const documentService = {
     return response.data;
   },
   
-  // Add this new method to submit documents for verification
+  // Submit documents for verification
   async submitDocumentsForVerification() {
     try {
       const response = await axios.post(`${API_URL}/submit`, {}, {

@@ -325,7 +325,7 @@ const MyServicesPage: React.FC = () => {
               {verificationStatus !== 'pending' && (
                 <div className="mt-3">
                   <Link 
-                    to="/provider/verification-documents" 
+                    to="/housekeeper/verification-documents" 
                     className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
                     <FaIdCard className="mr-2" /> Submit Documents Now

@@ -10,8 +10,8 @@ router.use(auth);
 // Get all available services for homeowners
 router.get('/', serviceController.getAllServices);
 
-// Get all services for the logged-in provider
-router.get('/provider', serviceController.getProviderServices);
+// Get all services for the logged-in provider/housekeeper
+router.get('/housekeeper', serviceController.getHousekeeperServices);
 
 // Create a new service - add file upload middleware
 router.post('/', serviceImageUpload, serviceController.createService);
@@ -20,7 +20,7 @@ router.post('/', serviceImageUpload, serviceController.createService);
 router.get('/debug/all', async (req, res) => {
   try {
     const Service = require('../models/service.model');
-    const services = await Service.find().populate('provider');
+    const services = await Service.find().populate('housekeeper');
     res.json(services);
   } catch (err) {
     console.error('Error:', err);

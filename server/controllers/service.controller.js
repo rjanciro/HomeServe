@@ -4,9 +4,9 @@ const { validationResult } = require('express-validator');
 const fs = require('fs');
 const path = require('path');
 
-exports.getProviderServices = async (req, res) => {
+exports.getHousekeeperServices = async (req, res) => {
   try {
-    const services = await Service.find({ provider: req.user.id });
+    const services = await Service.find({ housekeeper: req.user.id });
     res.json(services);
   } catch (err) {
     console.error(err.message);

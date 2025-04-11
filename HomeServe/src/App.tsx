@@ -109,7 +109,7 @@ const App: React.FC = () => {
               <Route path="/housekeeper/messages" element={<HousekeeperMessaging />} />
               <Route path="/housekeeper/profile" element={<HousekeeperProfileSettings />} />
               <Route path="/housekeeper/job-applications" element={<JobApplications />} />
-              <Route path="/maid/verification-documents" element={<VerificationDocumentsPage />} />
+              <Route path="/housekeeper/verification-documents" element={<VerificationDocumentsPage />} />
             </Route>
 
             {/* Admin routes */}

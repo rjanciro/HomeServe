@@ -14,7 +14,13 @@ const clients = new Map();
 // Start WebSocket server
 const startWebSocketServer = () => {
   const server = http.createServer();
-  const wss = new WebSocket.Server({ server });
+  const wss = new WebSocket.Server({ 
+    server,
+    cors: {
+      origin: ['http://localhost:5000', 'http://localhost:5173', 'http://127.0.0.1:5000', 'http://127.0.0.1:5173'],
+      credentials: true
+    }
+  });
 
   wss.on('connection', (ws) => {
     console.log('New client connected');

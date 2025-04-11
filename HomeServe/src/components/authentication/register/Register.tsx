@@ -1,7 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { UserType, FormData } from '../../../types';
-import Logo from '../../../assets/icons/HomeServe_Logo.png';
+import LogoBlue from '../../../assets/icons/HomeServe_Logo_Blue.png';
+import LogoGreen from '../../../assets/icons/HomeServe_Logo_Green.png';
 import useDocumentTitle from '../../../hooks/useDocumentTitle.ts';
 import { authService } from '../../services/auth.service';
 import axios from 'axios';
@@ -132,37 +133,50 @@ const RegisterPage: React.FC = () => {
     formData.password === formData.confirmPassword &&
     formData.agreeToTerms;
 
+  // Dynamically select the logo based on userType
+  const logo = userType === 'homeowner' ? LogoBlue : LogoGreen;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
         <div className="text-center mb-1">
-          <img src={Logo} alt="HomeServe Connect" className="mx-auto w-40 mb-1" />
+          <img 
+            src={logo} 
+            alt="HomeServe Connect" 
+            className="mx-auto w-40 mb-1" 
+          />
         </div>
 
-        {/* User Type Toggle */}
-        <div className="flex rounded-full bg-gray-100 p-1 mb-8">
-          <button
-            type="button"
-            className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'homeowner' ? 'bg-[#133E87] text-white' : 'text-gray-500'}`}
-            onClick={() => {
-              setUserType('homeowner');
-              console.log('Set user type to homeowner');
-            }}
-          >
-            Home Owner
-          </button>
-          <button
-            type="button"
-            className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'housekeeper' ? 'bg-[#137D13] text-white' : 'text-gray-500'}`}
-            onClick={() => {
-              setUserType('housekeeper');
-              console.log('Set user type to housekeeper');
-            }}
-          >
-            Housekeeper
-          </button>
+        {/* User Type Toggle - Updated with Animation */}
+        <div className="relative bg-gray-100 rounded-full p-1 mb-8 h-12">
+          {/* Sliding indicator */}
+          <div 
+            className={`absolute top-1 h-10 rounded-full transition-all duration-300 ease-in-out ${
+              userType === 'homeowner' 
+                ? 'w-[calc(50%-0.5rem)] left-1 bg-[#133E87]' 
+                : 'w-[calc(50%-0.5rem)] left-[calc(50%+0.5rem)] bg-[#137D13]'
+            }`}
+          />
+          
+          {/* Buttons container */}
+          <div className="relative flex h-full w-full">
+            <button
+              className={`flex-1 flex items-center justify-center z-10 rounded-full text-sm transition-colors ${
+                userType === 'homeowner' ? 'text-white' : 'text-gray-500'
+              }`}
+              onClick={() => setUserType('homeowner')}
+            >
+              Home Owner
+            </button>
+            <button
+              className={`flex-1 flex items-center justify-center z-10 rounded-full text-sm transition-colors ${
+                userType === 'housekeeper' ? 'text-white' : 'text-gray-500'
+              }`}
+              onClick={() => setUserType('housekeeper')}
+            >
+              Housekeeper
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -268,19 +282,25 @@ const RegisterPage: React.FC = () => {
             />
             <label className="text-sm text-gray-600">
               I agree to the{' '}
-              <Link to="/terms" className={`${
-                userType === 'homeowner' 
-                  ? 'text-[#133E87] hover:text-[#3A80D2]' 
-                  : 'text-[#137D13] hover:text-[#25A025]'
-              }`}>
+              <Link 
+                to="/terms" 
+                className={`${
+                  userType === 'homeowner' 
+                    ? 'text-[#133E87] hover:text-[#1F5CD1]' 
+                    : 'text-[#137D13] hover:text-[#1FA91F]'
+                }`}
+              >
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className={`${
-                userType === 'homeowner' 
-                  ? 'text-[#133E87] hover:text-[#3A80D2]' 
-                  : 'text-[#137D13] hover:text-[#25A025]'
-              }`}>
+              <Link 
+                to="/privacy" 
+                className={`${
+                  userType === 'homeowner' 
+                    ? 'text-[#133E87] hover:text-[#1F5CD1]' 
+                    : 'text-[#137D13] hover:text-[#1FA91F]'
+                }`}
+              >
                 Privacy Policy
               </Link>
             </label>
@@ -298,8 +318,8 @@ const RegisterPage: React.FC = () => {
             className={`w-full py-3 px-4 rounded-full transition-colors
               ${isFormValid && !isLoading
                 ? userType === 'homeowner'
-                  ? 'bg-[#133E87] text-white hover:bg-[#3A80D2]'
-                  : 'bg-[#137D13] text-white hover:bg-[#25A025]'
+                  ? 'bg-[#133E87] text-white hover:bg-[#1F5CD1]'
+                  : 'bg-[#137D13] text-white hover:bg-[#1FA91F]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
           >
             {isLoading ? 'Creating Account...' : 'Sign Up'}
@@ -308,11 +328,14 @@ const RegisterPage: React.FC = () => {
 
         <p className="mt-8 text-center text-gray-600">
           Already have an account?{' '}
-          <Link to="/login" className={`${
-            userType === 'homeowner' 
-              ? 'text-[#133E87] hover:text-[#3A80D2]' 
-              : 'text-[#137D13] hover:text-[#25A025]'
-          }`}>
+          <Link 
+            to="/login" 
+            className={`${
+              userType === 'homeowner' 
+                ? 'text-[#133E87] hover:text-[#1F5CD1]' 
+                : 'text-[#137D13] hover:text-[#1FA91F]'
+            }`}
+          >
             Login
           </Link>
         </p>

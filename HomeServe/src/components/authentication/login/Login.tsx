@@ -2,7 +2,8 @@ import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import Logo from '../../../assets/icons/HomeServe_Logo.png';
+import LogoBlue from '../../../assets/icons/HomeServe_Logo_Blue.png';
+import LogoGreen from '../../../assets/icons/HomeServe_Logo_Green.png';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import { UserType } from '../../../types';
 import { authService } from '../../services/auth.service';
@@ -17,6 +18,9 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Dynamically select the logo based on userType
+  const logo = userType === 'homeowner' ? LogoBlue : LogoGreen;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -79,29 +83,43 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
         <div className="text-center mb-1">
-          <img src={Logo} alt="HomeServe Connect" className="mx-auto w-40 mb-1" />
+          <img 
+            src={logo} 
+            alt="HomeServe Connect" 
+            className="mx-auto w-40 mb-1" 
+          />
         </div>
 
-        {/* User Type Toggle */}
-        <div className="flex rounded-full bg-gray-100 p-1 mb-8">
-          <button
-            className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'homeowner' 
-                ? 'bg-[#133E87] text-white' 
-                : 'text-gray-500'}`}
-            onClick={() => setUserType('homeowner')}
-          >
-            Home Owner
-          </button>
-          <button
-            className={`flex-1 py-3 rounded-full text-sm transition-colors
-              ${userType === 'housekeeper' 
-                ? 'bg-[#137D13] text-white' 
-                : 'text-gray-500'}`}
-            onClick={() => setUserType('housekeeper')}
-          >
-            Housekeeper
-          </button>
+        {/* User Type Toggle - Fixed Layout */}
+        <div className="relative bg-gray-100 rounded-full p-1 mb-8 h-12">
+          {/* Sliding indicator */}
+          <div 
+            className={`absolute top-1 h-10 rounded-full transition-all duration-300 ease-in-out ${
+              userType === 'homeowner' 
+                ? 'w-[calc(50%-0.5rem)] left-1 bg-[#133E87]' 
+                : 'w-[calc(50%-0.5rem)] left-[calc(50%+0.5rem)] bg-[#137D13]'
+            }`}
+          />
+          
+          {/* Buttons container */}
+          <div className="relative flex h-full w-full">
+            <button
+              className={`flex-1 flex items-center justify-center z-10 rounded-full text-sm transition-colors ${
+                userType === 'homeowner' ? 'text-white' : 'text-gray-500'
+              }`}
+              onClick={() => setUserType('homeowner')}
+            >
+              Home Owner
+            </button>
+            <button
+              className={`flex-1 flex items-center justify-center z-10 rounded-full text-sm transition-colors ${
+                userType === 'housekeeper' ? 'text-white' : 'text-gray-500'
+              }`}
+              onClick={() => setUserType('housekeeper')}
+            >
+              Housekeeper
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -149,11 +167,14 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div className="text-right">
-            <Link to="/forgot-password" className={`text-gray-500 hover:${
-              userType === 'homeowner' 
-                ? 'text-[#133E87]' 
-                : 'text-[#137D13]'
-            } text-sm`}>
+            <Link 
+              to="/forgot-password" 
+              className={`text-gray-500 hover:${
+                userType === 'homeowner' 
+                  ? 'text-[#1F5CD1]' 
+                  : 'text-[#1FA91F]'
+              } text-sm`}
+            >
               Forgot Password?
             </Link>
           </div>
@@ -164,8 +185,8 @@ const LoginPage: React.FC = () => {
             className={`w-full py-3 px-4 rounded-full transition-colors
               ${isFormValid && !isLoading
                 ? userType === 'homeowner'
-                  ? 'bg-[#133E87] text-white hover:bg-[#3A80D2]'
-                  : 'bg-[#137D13] text-white hover:bg-[#25A025]'
+                  ? 'bg-[#133E87] text-white hover:bg-[#1F5CD1]'
+                  : 'bg-[#137D13] text-white hover:bg-[#1FA91F]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
           >
             {isLoading ? 'Logging in...' : 'Login'}
@@ -174,11 +195,14 @@ const LoginPage: React.FC = () => {
 
         <p className="mt-8 text-center text-gray-600">
           Don't have an account?{' '}
-          <Link to="/signup" className={`${
-            userType === 'homeowner' 
-              ? 'text-[#133E87] hover:text-[#3A80D2]' 
-              : 'text-[#137D13] hover:text-[#25A025]'
-          }`}>
+          <Link 
+            to="/signup" 
+            className={`${
+              userType === 'homeowner' 
+                ? 'text-[#133E87] hover:text-[#1F5CD1]' 
+                : 'text-[#137D13] hover:text-[#1FA91F]'
+            }`}
+          >
             Sign up
           </Link>
         </p>

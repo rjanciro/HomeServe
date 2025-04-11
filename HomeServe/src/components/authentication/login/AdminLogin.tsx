@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaShieldAlt } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import Logo from '../../../assets/icons/HomeServe_Transparent_Logo.png';
+import Logo from '../../../assets/icons/HomeServe_Logo_Red.png';
 import { adminService } from '../../services/admin.service';
 
 const AdminLoginPage: React.FC = () => {

@@ -21,9 +21,9 @@ router.post(
 // @access  Private/Admin
 router.get('/me', adminAuth, adminController.getAdminProfile);
 
-// @route   GET api/admin/service-providers
-// @desc    Get all service providers
+// @route   GET api/admin/housekeepers
+// @desc    Get all housekeepers
 // @access  Private/Admin
-router.get('/service-providers', adminAuth, adminController.getAllServiceProviders);
+router.get('/housekeepers', adminAuth, adminController.getAllHousekeepers);
 
 module.exports = router; 

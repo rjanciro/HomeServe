@@ -32,6 +32,8 @@ import AdminLogin from './components/authentication/login/AdminLogin';
 import AdminSidebar from './components/layout/AdminSidebar';
 import AdminDashboard from './components/dashboard/admin/AdminDashboard';
 import PrivateAdminRoute from './components/routes/PrivateAdminRoute';
+import UsersHousekeepersPage from './components/pages/admin/user-management/UsersHousekeepers';
+import HousekeeperVerificationDetails from './components/pages/admin/user-management/HousekeeperVerificationDetails';
 
 // Both Components
 import EmailVerification from './components/authentication/EmailVerification';
@@ -40,8 +42,6 @@ import VerificationPending from './components/authentication/VerificationPending
 
 // Undecided Components
 import { MessagingProvider } from './contexts/MessagingContext';
-import UsersServiceProvidersPage from './components/pages/admin/user-management/UsersServiceProviders';
-import ProviderVerificationDetailsPage from './components/pages/admin/user-management/ProviderVerificationDetails';
 import VerificationDocumentsPage from './components/pages/housekeeper/VerificationDocuments';
 
 
@@ -115,8 +115,8 @@ const App: React.FC = () => {
             {/* Admin routes */}
             <Route element={<PrivateAdminRoute element={<AdminSidebar />} />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/service-providers" element={<UsersServiceProvidersPage />} />
-              <Route path="/admin/service-providers/:userId" element={<ProviderVerificationDetailsPage />} />
+              <Route path="/admin/housekeepers" element={<UsersHousekeepersPage />} />
+              <Route path="/admin/housekeepers/:userId" element={<HousekeeperVerificationDetails />} />
             </Route>
 
             {/* Email verification routes */}

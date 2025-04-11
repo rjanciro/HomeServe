@@ -83,17 +83,17 @@ exports.getAdminProfile = async (req, res) => {
   }
 };
 
-exports.getAllServiceProviders = async (req, res) => {
+exports.getAllHousekeepers = async (req, res) => {
   try {
-    const providers = await User.find({ userType: 'provider' }).select('-password');
-    res.json(providers);
+    const housekeepers = await User.find({ userType: 'housekeeper' }).select('-password');
+    res.json(housekeepers);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-exports.getProviderDocuments = async (req, res) => {
+exports.getHousekeeperDocuments = async (req, res) => {
   try {
     const userId = req.params.userId;
     const user = await User.findById(userId);

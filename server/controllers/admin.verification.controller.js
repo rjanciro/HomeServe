@@ -1,33 +1,33 @@
 const User = require('../models/user.model');
 
-exports.getPendingProviders = async (req, res) => {
+exports.getPendingHousekeepers = async (req, res) => {
   try {
-    const pendingProviders = await User.find({
-      userType: 'provider',
+    const pendingHousekeepers = await User.find({
+      userType: 'housekeeper',
       verificationStatus: 'pending'
     }).select('-password');
     
-    res.json(pendingProviders);
+    res.json(pendingHousekeepers);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-exports.getAllProviders = async (req, res) => {
+exports.getAllHousekeepers = async (req, res) => {
   try {
-    const providers = await User.find({
-      userType: 'provider'
+    const housekeepers = await User.find({
+      userType: 'housekeeper'
     }).select('-password');
     
-    res.json(providers);
+    res.json(housekeepers);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-exports.verifyProvider = async (req, res) => {
+exports.verifyHousekeeper = async (req, res) => {
   try {
     console.log('Verification request received:', req.body);
     
@@ -60,7 +60,7 @@ exports.verifyProvider = async (req, res) => {
     await user.save();
     
     res.json({ 
-      message: `Provider ${approved ? 'approved' : 'rejected'} successfully`,
+      message: `Housekeeper ${approved ? 'approved' : 'rejected'} successfully`,
       user: {
         _id: user._id,
         verificationStatus: user.verificationStatus,
@@ -68,12 +68,12 @@ exports.verifyProvider = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in verifyProvider:', error);
+    console.error('Error in verifyHousekeeper:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-exports.getProviderDocuments = async (req, res) => {
+exports.getHousekeeperDocuments = async (req, res) => {
   const { userId } = req.params;
   
   try {
@@ -83,12 +83,12 @@ exports.getProviderDocuments = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    if (user.userType !== 'provider') {
-      return res.status(400).json({ message: 'User is not a service provider' });
+    if (user.userType !== 'housekeeper') {
+      return res.status(400).json({ message: 'User is not a housekeeper' });
     }
     
     res.json({
-      provider: {
+      housekeeper: {
         _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -104,26 +104,26 @@ exports.getProviderDocuments = async (req, res) => {
   }
 };
 
-exports.updateProviderStatus = async (req, res) => {
+exports.updateHousekeeperStatus = async (req, res) => {
   try {
-    const { providerId } = req.params;
+    const { housekeeperId } = req.params;
     const { isActive, notes } = req.body;
     
-    if (!providerId) {
-      return res.status(400).json({ message: 'Provider ID is required' });
+    if (!housekeeperId) {
+      return res.status(400).json({ message: 'Housekeeper ID is required' });
     }
     
-    const user = await User.findById(providerId);
+    const user = await User.findById(housekeeperId);
     
     if (!user) {
-      return res.status(404).json({ message: 'Provider not found' });
+      return res.status(404).json({ message: 'Housekeeper not found' });
     }
     
-    if (user.userType !== 'provider') {
-      return res.status(400).json({ message: 'User is not a service provider' });
+    if (user.userType !== 'housekeeper') {
+      return res.status(400).json({ message: 'User is not a housekeeper' });
     }
     
-    // Update the provider's active status
+    // Update the housekeeper's active status
     user.isActive = isActive;
     user.statusNotes = notes;
     user.statusUpdateDate = new Date();
@@ -139,8 +139,8 @@ exports.updateProviderStatus = async (req, res) => {
     await user.save();
     
     res.json({ 
-      message: `Provider ${isActive ? 'enabled' : 'disabled'} successfully`,
-      provider: {
+      message: `Housekeeper ${isActive ? 'enabled' : 'disabled'} successfully`,
+      housekeeper: {
         _id: user._id,
         isActive: user.isActive,
         statusNotes: user.statusNotes,
@@ -148,7 +148,7 @@ exports.updateProviderStatus = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating provider status:', error);
+    console.error('Error updating housekeeper status:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 }; 

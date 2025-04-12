@@ -26,7 +26,7 @@ exports.createService = async (req, res) => {
     console.log('Request file:', req.file);
     console.log('User ID:', req.user.id);
     
-    // Check if the user is a service provider
+    // Check if the user is a housekeeper
     const user = await User.findById(req.user.id);
     console.log('User found:', !!user);
     
@@ -34,11 +34,11 @@ exports.createService = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    if (user.userType !== 'provider') {
-      return res.status(403).json({ message: 'Only service providers can create services' });
+    if (user.userType !== 'housekeeper') {
+      return res.status(403).json({ message: 'Only housekeepers can create services' });
     }
     
-    // Check if the provider is verified
+    // Check if the housekeeper is verified
     if (!user.isVerified && user.verificationStatus !== 'approved' && user.verificationStatus !== 'verified') {
       return res.status(403).json({ 
         message: 'Your account needs to be verified by an administrator before you can create services',
@@ -46,7 +46,7 @@ exports.createService = async (req, res) => {
       });
     }
 
-    // Check if the provider is active - use strict comparison with false
+    // Check if the housekeeper is active - use strict comparison with false
     if (user.isActive === false) {
       return res.status(403).json({ 
         message: 'Your account has been disabled by an administrator. You cannot create services at this time.',
@@ -76,7 +76,7 @@ exports.createService = async (req, res) => {
       price: req.body.price,
       isAvailable: req.body.isAvailable === 'true',
       contactNumber: req.body.contactNumber,
-      provider: req.user.id
+      housekeeper: req.user.id
     });
 
     // Add image if uploaded
@@ -100,8 +100,8 @@ exports.getServiceById = async (req, res) => {
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    // Check if the user is the provider of this service
-    if (service.provider.toString() !== req.user.id) {
+    // Check if the user is the housekeeper of this service
+    if (service.housekeeper.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
@@ -135,15 +135,15 @@ exports.updateService = async (req, res) => {
     }
     
     // Check ownership
-    if (service.provider.toString() !== req.user.id) {
+    if (service.housekeeper.toString() !== req.user.id) {
       return res.status(401).json({ message: 'Not authorized to update this service' });
     }
     
-    // Check if the provider is active
-    if (service.provider.isActive === false) {
+    // Check if the housekeeper is active
+    if (service.housekeeper.isActive === false) {
       return res.status(403).json({ 
         message: 'Your account has been disabled by an administrator. You cannot update services at this time.',
-        statusNotes: service.provider.statusNotes
+        statusNotes: service.housekeeper.statusNotes
       });
     }
     
@@ -210,8 +210,8 @@ exports.deleteService = async (req, res) => {
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    // Check if the user is the provider of this service
-    if (service.provider.toString() !== req.user.id) {
+    // Check if the user is the housekeeper of this service
+    if (service.housekeeper.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
@@ -236,16 +236,16 @@ exports.toggleAvailability = async (req, res) => {
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    // Check if the user is the provider of this service
-    if (service.provider.toString() !== req.user.id) {
+    // Check if the user is the housekeeper of this service
+    if (service.housekeeper.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    // Check if the provider is active
-    if (service.provider.isActive === false) {
+    // Check if the housekeeper is active
+    if (service.housekeeper.isActive === false) {
       return res.status(403).json({ 
         message: 'Your account has been disabled by an administrator. You cannot update services at this time.',
-        statusNotes: service.provider.statusNotes
+        statusNotes: service.housekeeper.statusNotes
       });
     }
 
@@ -274,18 +274,18 @@ exports.getAllServices = async (req, res) => {
     // Apply filters including isAvailable=true directly in the database query
     const services = await Service.find({ isAvailable: true })
       .populate({
-        path: 'provider',
+        path: 'housekeeper',
         select: 'firstName lastName profileImage businessName isVerified isActive',
       });
     
     console.log(`Total available services: ${services.length}`);
     
-    // Only return services with active providers
+    // Only return services with active housekeepers
     const activeServices = services.filter(service => 
-      service.provider !== null && service.provider.isActive !== false
+      service.housekeeper !== null && service.housekeeper.isActive !== false
     );
     
-    console.log(`Services with active providers: ${activeServices.length}`);
+    console.log(`Services with active housekeepers: ${activeServices.length}`);
     
     res.json(activeServices);
   } catch (err) {

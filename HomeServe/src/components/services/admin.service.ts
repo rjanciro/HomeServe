@@ -32,23 +32,34 @@ export const adminService = {
     return adminStr ? JSON.parse(adminStr) : null;
   },
 
-  // Get all service providers
-  async getAllProviders() {
-    const response = await axios.get(`${API_URL}/verification/providers`, {
-      headers: getAdminAuthHeader()
-    });
-    return response.data;
-  },
-
-  // Get provider documents
-  async getProviderDocuments(userId: string) {
+  // Get all housekeepers
+  async getAllHousekeepers() {
     try {
-      const response = await axios.get(`${API_URL}/verification/provider-documents/${userId}`, {
+      const response = await axios.get(`${API_URL}/housekeepers`, {
         headers: getAdminAuthHeader()
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting provider documents:', error);
+      console.error('Error getting all housekeepers:', error);
+      throw error;
+    }
+  },
+
+  // Get housekeeper documents
+  async getHousekeeperDocuments(userId: string) {
+    try {
+      console.log("Calling API for housekeeper documents:", userId);
+      const response = await axios.get(`${API_URL}/housekeepers/documents/${userId}`, {
+        headers: getAdminAuthHeader()
+      });
+      console.log("API response:", response.data);
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting housekeeper documents:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
       throw error;
     }
   },
@@ -66,11 +77,11 @@ export const adminService = {
     return response.data;
   },
 
-  // Verify service provider
-  async verifyProvider(userId: string, params: VerificationParams) {
+  // Verify housekeeper
+  async verifyHousekeeper(userId: string, params: VerificationParams) {
     try {
       const response = await axios.post(
-        `${API_URL}/verification/verify-provider`,
+        `${API_URL}/verification/verify-housekeeper`,
         {
           userId,
           approved: params.approved,
@@ -83,29 +94,29 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Error verifying provider:', error);
+      console.error('Error verifying housekeeper:', error);
       throw error;
     }
   },
 
-  // Add this new method to the adminService object
-  async getProviderById(userId: string) {
+  // Get housekeeper by ID
+  async getHousekeeperById(userId: string) {
     try {
-      const response = await axios.get(`${API_URL}/users/providers/${userId}`, {
+      const response = await axios.get(`${API_URL}/housekeepers/${userId}`, {
         headers: getAdminAuthHeader()
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting provider data:', error);
+      console.error('Error getting housekeeper data:', error);
       throw error;
     }
   },
 
-  // Add this method to the admin service
-  updateProviderStatus: async (providerId: string, data: { isActive: boolean, notes: string }) => {
+  // Update housekeeper status
+  updateHousekeeperStatus: async (housekeeperId: string, data: { isActive: boolean, notes: string }) => {
     try {
       const response = await axios.put(
-        `${API_URL}/verification/provider-status/${providerId}`,
+        `${API_URL}/housekeepers/status/${housekeeperId}`,
         data,
         {
           headers: getAdminAuthHeader()
@@ -113,7 +124,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Error updating provider status: ', error);
+      console.error('Error updating housekeeper status: ', error);
       throw error;
     }
   }

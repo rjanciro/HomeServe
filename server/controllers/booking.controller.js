@@ -19,7 +19,7 @@ exports.createBooking = async (req, res) => {
       });
     }
 
-    // Get service details to check if it exists and to get the provider ID
+    // Get service details to check if it exists and to get the housekeeper ID
     const service = await Service.findById(serviceId);
     
     if (!service) {
@@ -30,7 +30,7 @@ exports.createBooking = async (req, res) => {
     const newBooking = new Booking({
       service: serviceId,
       customer: customerId,
-      provider: service.provider,
+      housekeeper: service.housekeeper,
       date: new Date(date),
       time,
       location,
@@ -70,7 +70,7 @@ exports.getCustomerBookings = async (req, res) => {
 
     const bookings = await Booking.find({ customer: customerId })
       .populate('service', 'name category image price pricingType')
-      .populate('provider', 'firstName lastName businessName profileImage')
+      .populate('housekeeper', 'firstName lastName businessName profileImage')
       .sort({ createdAt: -1 });
 
     res.status(200).json(bookings);
@@ -81,25 +81,25 @@ exports.getCustomerBookings = async (req, res) => {
 };
 
 /**
- * Get all bookings for the authenticated service provider
+ * Get all bookings for the authenticated housekeeper
  */
-exports.getProviderBookings = async (req, res) => {
+exports.getHousekeeperBookings = async (req, res) => {
   try {
-    const providerId = req.user.id;
+    const housekeeperId = req.user.id;
     
-    // Validate if the user is a provider
-    if (req.user.userType !== 'provider') {
-      return res.status(403).json({ message: 'Access denied. Only service providers can view their bookings.' });
+    // Validate if the user is a housekeeper
+    if (req.user.userType !== 'housekeeper') {
+      return res.status(403).json({ message: 'Access denied. Only housekeepers can view their bookings.' });
     }
 
-    const bookings = await Booking.find({ provider: providerId })
+    const bookings = await Booking.find({ housekeeper: housekeeperId })
       .populate('service', 'name category image price pricingType')
       .populate('customer', 'firstName lastName profileImage')
       .sort({ createdAt: -1 });
 
     res.status(200).json(bookings);
   } catch (error) {
-    console.error('Error fetching provider bookings:', error);
+    console.error('Error fetching housekeeper bookings:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -114,7 +114,7 @@ exports.getBookingById = async (req, res) => {
 
     const booking = await Booking.findById(bookingId)
       .populate('service', 'name category description image price pricingType')
-      .populate('provider', 'firstName lastName businessName profileImage phone')
+      .populate('housekeeper', 'firstName lastName businessName profileImage phone')
       .populate('customer', 'firstName lastName profileImage phone');
 
     if (!booking) {
@@ -123,7 +123,7 @@ exports.getBookingById = async (req, res) => {
 
     // Check if the user is authorized to view this booking
     if (booking.customer._id.toString() !== userId && 
-        booking.provider._id.toString() !== userId && 
+        booking.housekeeper._id.toString() !== userId && 
         req.user.userType !== 'admin') {
       return res.status(403).json({ message: 'You are not authorized to view this booking' });
     }
@@ -158,10 +158,10 @@ exports.updateBookingStatus = async (req, res) => {
 
     // Check permissions based on the requested status change
     if ((status === 'confirmed' || status === 'rejected') && 
-        booking.provider.toString() !== userId && 
+        booking.housekeeper.toString() !== userId && 
         req.user.userType !== 'admin') {
       return res.status(403).json({ 
-        message: 'Only the service provider or admin can confirm or reject bookings' 
+        message: 'Only the housekeeper or admin can confirm or reject bookings' 
       });
     }
 
@@ -209,7 +209,7 @@ exports.cancelBooking = async (req, res) => {
 
     // Check if user is authorized to cancel this booking
     if (booking.customer.toString() !== userId && 
-        booking.provider.toString() !== userId && 
+        booking.housekeeper.toString() !== userId && 
         req.user.userType !== 'admin') {
       return res.status(403).json({ message: 'You are not authorized to cancel this booking' });
     }
@@ -252,10 +252,10 @@ exports.completeBooking = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    // Only the service provider or admin can mark a booking as completed
-    if (booking.provider.toString() !== userId && req.user.userType !== 'admin') {
+    // Only the housekeeper or admin can mark a booking as completed
+    if (booking.housekeeper.toString() !== userId && req.user.userType !== 'admin') {
       return res.status(403).json({ 
-        message: 'Only the service provider or admin can mark a booking as completed' 
+        message: 'Only the housekeeper or admin can mark a booking as completed' 
       });
     }
 
@@ -311,10 +311,10 @@ exports.updatePaymentStatus = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    // Only the service provider or admin can update payment status
-    if (booking.provider.toString() !== userId && req.user.userType !== 'admin') {
+    // Only the housekeeper or admin can update payment status
+    if (booking.housekeeper.toString() !== userId && req.user.userType !== 'admin') {
       return res.status(403).json({ 
-        message: 'Only the service provider or admin can update payment status' 
+        message: 'Only the housekeeper or admin can update payment status' 
       });
     }
 

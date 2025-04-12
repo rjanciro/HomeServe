@@ -115,7 +115,7 @@ const App: React.FC = () => {
             {/* Admin routes */}
             <Route element={<PrivateAdminRoute element={<AdminSidebar />} />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/housekeepers" element={<UsersHousekeepersPage />} />
+              <Route path="/admin/users/housekeepers" element={<UsersHousekeepersPage />} />
               <Route path="/admin/housekeepers/:userId" element={<HousekeeperVerificationDetails />} />
             </Route>
 

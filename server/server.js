@@ -19,14 +19,24 @@ const app = express();
 app.use(express.json());
 app.use(cors({
   origin: ['http://localhost:5000', 'http://localhost:5173', 'http://127.0.0.1:5000', 'http://127.0.0.1:5173'],
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['Content-Disposition']
 }));
+
+// Add OPTIONS handling for preflight requests
+app.options('*', cors());
 
 // Create uploads directory if it doesn't exist
 createUploadDirs();
 
-// Serve static files from uploads directories
-app.use('/uploads/verification', express.static(path.join(__dirname, 'uploads/verification')));
+// Serve static files with proper headers
+app.use('/uploads/verification', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, 'uploads/verification')));
+
 app.use('/uploads/profile_pictures', express.static(path.join(__dirname, 'uploads/profile_pictures')));
 app.use('/uploads/services_pictures', express.static(path.join(__dirname, 'uploads/services_pictures')));
 
@@ -51,6 +61,20 @@ app.get('/check-file/:filename', (req, res) => {
     res.send(`File exists: ${filePath}`);
   } else {
     res.status(404).send(`File does not exist: ${filePath}`);
+  }
+});
+
+// Add this route to help debug the file mappings
+app.get('/api/check-files', (req, res) => {
+  const verificationDir = path.join(__dirname, 'uploads/verification');
+  try {
+    const files = fs.readdirSync(verificationDir);
+    res.json({ 
+      files,
+      directory: verificationDir
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

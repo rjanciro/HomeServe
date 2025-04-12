@@ -26,4 +26,9 @@ router.get('/me', adminAuth, adminController.getAdminProfile);
 // @access  Private/Admin
 router.get('/housekeepers', adminAuth, adminController.getAllHousekeepers);
 
+// @route   GET api/admin/housekeepers/documents/:userId
+// @desc    Get housekeeper documents
+// @access  Private/Admin
+router.get('/housekeepers/documents/:userId', adminAuth, adminController.getHousekeeperDocuments);
+
 module.exports = router; 

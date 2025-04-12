@@ -6,7 +6,7 @@ const serviceSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  provider: {
+  housekeeper: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true

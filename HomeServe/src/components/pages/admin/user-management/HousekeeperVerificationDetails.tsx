@@ -26,21 +26,18 @@ interface DocumentType {
   notes?: string;
 }
 
-interface ProviderDocuments {
-  businessRegistration?: DocumentType;
-  representativeId?: DocumentType;
-  professionalLicenses?: DocumentType;
-  portfolio?: DocumentType;
+interface HousekeeperDocuments {
+  [key: string]: DocumentType;
 }
 
-interface Provider {
+interface Housekeeper {
   _id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone?: string;
   verificationStatus?: string;
-  documents?: ProviderDocuments;
+  documents?: HousekeeperDocuments;
   profileImage?: string;
   businessName?: string;
   bio?: string;
@@ -58,96 +55,57 @@ interface VerificationHistory {
 // Define this in a shared types file
 export type VerificationStatus = 'pending' | 'approved' | 'rejected';
 
-const ProviderVerificationDetailsPage: React.FC = () => {
+const HousekeeperVerificationDetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   
-  useDocumentTitle('Provider Verification Details | Admin');
+  useDocumentTitle('Housekeeper Verification Details | Admin');
   
-  const [provider, setProvider] = useState<Provider | null>(null);
-  const [documents, setDocuments] = useState<ProviderDocuments | null>(null);
+  const [housekeeper, setHousekeeper] = useState<Housekeeper | null>(null);
+  const [documents, setDocuments] = useState<HousekeeperDocuments | null>(null);
   const [history, setHistory] = useState<VerificationHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
-  const [documentNotes, setDocumentNotes] = useState<Record<string, string>>({
-    businessRegistration: '',
-    representativeId: '',
-    professionalLicenses: '',
-    portfolio: ''
-  });
+  const [documentNotes, setDocumentNotes] = useState<Record<string, string>>({});
   const [selectedDocument, setSelectedDocument] = useState<{url: string, type: string} | null>(null);
 
   useEffect(() => {
     if (userId) {
-      fetchProviderDocuments();
+      fetchHousekeeperDocuments();
     }
   }, [userId]);
 
-  const fetchProviderDocuments = async () => {
+  const fetchHousekeeperDocuments = async () => {
     setLoading(true);
     try {
-      // First, get the documents which has incomplete provider info
-      const data = await adminService.getProviderDocuments(userId as string);
+      console.log("Fetching documents for user ID:", userId);
+      const data = await adminService.getHousekeeperDocuments(userId as string);
       
-      // Detailed logging of the entire response structure
-      console.log("===== COMPLETE API RESPONSE =====");
-      console.log(JSON.stringify(data, null, 2));
-      
-      // Check specifically for representativeId documents
-      console.log("===== REPRESENTATIVE ID DOCUMENTS =====");
-      console.log(JSON.stringify(data.documents?.representativeId, null, 2));
-      
-      if (data.documents?.representativeId?.files) {
-        console.log("First file properties:", Object.keys(data.documents.representativeId.files[0]));
-      }
+      console.log("Received data:", data);
       
       // Set the documents and history
-      setDocuments(data.documents);
+      setDocuments(data.documents || {});
       setHistory(data.history || []);
 
-      // Pre-fill notes if they exist
-      const notes: Record<string, string> = {};
-      for (const docType in data.documents) {
-        if (data.documents[docType]?.notes) {
-          notes[docType] = data.documents[docType].notes || '';
-        }
-      }
-      setDocumentNotes(notes);
-      
-      // Now get the provider data from the getAllProviders endpoint
-      try {
-        const providers = await adminService.getAllProviders();
-        const fullProviderData = providers.find((p: any) => p._id === userId);
-        
-        if (fullProviderData) {
-          console.log("Found provider with image:", fullProviderData.profileImage);
-          setProvider(fullProviderData); // This should have the profileImage
-        } else {
-          // Still use the original provider data if not found in the list
-          setProvider(data.provider);
-        }
-      } catch (err) {
-        console.error('Error fetching complete provider data:', err);
-        // Still use the original provider data if the second request fails
-        setProvider(data.provider);
-      }
-    } catch (error) {
-      console.error('Error fetching provider documents:', error);
-      toast.error('Failed to load provider verification documents');
+      // Set housekeeper data
+      setHousekeeper(data.housekeeper || null);
+    } catch (error: any) {
+      console.error('Error fetching housekeeper documents:', error);
+      toast.error('Failed to load housekeeper verification documents');
     } finally {
       setLoading(false);
     }
   };
 
   const handleReviewAction = async (approved: boolean) => {
-    if (!provider) return;
+    if (!housekeeper) return;
     
     // Prompt for notes
     const { value: notes } = await Swal.fire({
       title: 'Review Notes',
       input: 'textarea',
       inputLabel: approved ? 'Approval notes (optional)' : 'Rejection reason (required)',
-      inputPlaceholder: approved ? 'Enter any notes...' : 'Please explain why this provider is being rejected...',
+      inputPlaceholder: approved ? 'Enter any notes...' : 'Please explain why this housekeeper is being rejected...',
       inputValidator: (value) => {
         if (!approved && !value) {
           return 'You need to provide a reason for rejection';
@@ -155,7 +113,7 @@ const ProviderVerificationDetailsPage: React.FC = () => {
         return null;
       },
       showCancelButton: true,
-      confirmButtonText: approved ? 'Approve Provider' : 'Reject Provider',
+      confirmButtonText: approved ? 'Approve Housekeeper' : 'Reject Housekeeper',
       confirmButtonColor: approved ? '#10B981' : '#EF4444',
     });
     
@@ -163,19 +121,23 @@ const ProviderVerificationDetailsPage: React.FC = () => {
     
     setVerifying(true);
     try {
-      await adminService.verifyProvider(provider._id, {
+      await adminService.verifyHousekeeper(housekeeper._id, {
         approved: approved,
         notes: notes,
         documentReview: {}
       });
       
-      toast.success(`Provider ${approved ? 'approved' : 'rejected'} successfully`);
+      toast.success(`Housekeeper ${approved ? 'approved' : 'rejected'} successfully`);
       
       // Refresh data
-      fetchProviderDocuments();
+      fetchHousekeeperDocuments();
     } catch (error) {
-      console.error('Error during provider review:', error);
-      toast.error('Failed to process provider review');
+      if (error instanceof Error) {
+        console.error('Error during housekeeper review:', error.message);
+      } else {
+        console.error('Unknown error during housekeeper review:', error);
+      }
+      toast.error('Failed to process housekeeper review');
     } finally {
       setVerifying(false);
     }
@@ -269,7 +231,7 @@ const ProviderVerificationDetailsPage: React.FC = () => {
   };
 
   const renderDocumentSection = (docType: string, label: string) => {
-    const docData = documents?.[docType as keyof ProviderDocuments];
+    const docData = documents?.[docType as keyof HousekeeperDocuments];
     
     // Debug log to see document data structure
     console.log(`Document data for ${docType}:`, docData);
@@ -307,17 +269,7 @@ const ProviderVerificationDetailsPage: React.FC = () => {
             console.log(`Raw URL for ${file.filename}:`, fileUrl);
             
             // Format full URL
-            const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8080';
-            
-            // Remove any duplicate slashes that might be causing issues
-            let cleanPath = fileUrl || '';
-            if (cleanPath.startsWith('/')) {
-              cleanPath = cleanPath.substring(1);
-            }
-            
-            const fullUrl = fileUrl?.startsWith('http') 
-              ? fileUrl 
-              : `${apiBaseUrl}/${cleanPath}`;
+            const fullUrl = getFullUrl(fileUrl);
             
             console.log(`Final URL being used:`, fullUrl);
             
@@ -354,10 +306,48 @@ const ProviderVerificationDetailsPage: React.FC = () => {
                         alt={file.filename} 
                         className="w-full h-full object-contain"
                         onError={(e) => {
-                          console.error("Failed to load image:", fullUrl);
+                          console.error(`Failed to load image: ${fullUrl}`);
+                          
+                          // First, try the direct filepath
                           const target = e.target as HTMLImageElement;
-                          target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
-                          target.className = "w-full h-full object-contain opacity-50";
+                          const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8080';
+                          
+                          // Try all fallback strategies
+                          // 1. Try direct file path
+                          const filename = file.filename;
+                          const staticUrl = `${apiBaseUrl}/uploads/verification/${filename}`;
+                          console.log("Trying static URL:", staticUrl);
+                          
+                          // 2. Try the user-specific file endpoint
+                          const fallbackUrl = `${apiBaseUrl}/api/documents/file/${userId}`;
+                          console.log("Will try fallback URL if static fails:", fallbackUrl);
+                          
+                          // 3. Try the debug endpoint
+                          const debugUrl = `${apiBaseUrl}/api/documents/debug/${userId}`;
+                          
+                          // Call the debug endpoint first to log what files are actually available
+                          fetch(debugUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                              console.log("Debug info for files:", data);
+                              // Continue with fallback strategy after seeing what's available
+                              
+                              // First try the static URL
+                              const testImg = new Image();
+                              testImg.onload = () => {
+                                target.src = staticUrl;
+                              };
+                              testImg.onerror = () => {
+                                // If static URL fails, try the fallback
+                                target.src = fallbackUrl;
+                              };
+                              testImg.src = staticUrl;
+                            })
+                            .catch(err => {
+                              console.error("Failed to get debug info:", err);
+                              // Continue with fallback even if debug fails
+                              target.src = fallbackUrl;
+                            });
                         }}
                       />
                     </div>
@@ -394,12 +384,12 @@ const ProviderVerificationDetailsPage: React.FC = () => {
     return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension || '');
   };
 
-  const handleApproveProvider = async () => {
+  const handleApproveHousekeeper = async () => {
     try {
       // Show confirmation dialog
       const result = await Swal.fire({
-        title: 'Approve Provider',
-        text: 'Are you sure you want to approve this service provider?',
+        title: 'Approve Housekeeper',
+        text: 'Are you sure you want to approve this housekeeper?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#4CAF50',
@@ -410,52 +400,78 @@ const ProviderVerificationDetailsPage: React.FC = () => {
 
       if (result.isConfirmed) {
         // Show loading toast
-        const loadingToast = toast.loading('Approving provider...');
+        const loadingToast = toast.loading('Approving housekeeper...');
         
         // Collect all document reviews (assuming all are approved)
         const documentReview: Record<string, {verified: boolean}> = {};
-        if (provider?.documents) {
-          Object.keys(provider.documents).forEach(docType => {
+        if (documents) {
+          Object.keys(documents).forEach(docType => {
             documentReview[docType] = { verified: true };
           });
         }
         
-        // Call the API to verify the provider
+        // Call the API to verify the housekeeper
         if (userId) {
-          await adminService.verifyProvider(userId, {
+          await adminService.verifyHousekeeper(userId, {
             approved: true,
-            notes: 'Provider approved by admin',
+            notes: 'Housekeeper approved by admin',
             documentReview
           });
         }
         
         // Dismiss loading toast and show success message
         toast.dismiss(loadingToast);
-        toast.success('Provider successfully approved');
+        toast.success('Housekeeper successfully approved');
         
-        // Refresh the provider data
-        fetchProviderDocuments();
+        // Refresh the housekeeper data
+        fetchHousekeeperDocuments();
       }
-    } catch (error) {
-      console.error('Error approving provider:', error);
-      toast.error('Failed to approve provider');
+    } catch (error: any) {
+      console.error('Error approving housekeeper:', error);
+      toast.error('Failed to approve housekeeper');
     }
+  };
+
+  // Update this function to correctly map file URLs
+  const getFullUrl = (fileUrl: string | undefined): string => {
+    if (!fileUrl) {
+      console.log("getFullUrl received undefined or empty fileUrl");
+      return ''; // Return empty string for invalid input
+    }
+
+    // If it's already a full absolute URL (e.g., from a different source), return it
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+      console.log("getFullUrl received an absolute URL:", fileUrl);
+      return fileUrl;
+    }
+
+    // Get the API base URL
+    const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8080';
+
+    // Assuming fileUrl is a relative path like '/uploads/verification/...'
+    // Just prepend the base URL
+    console.log("getFullUrl constructing full URL from relative path:", fileUrl);
+    // Ensure there's only one slash between base URL and relative path
+    const fullUrl = `${apiBaseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`; 
+    console.log("getFullUrl final constructed URL:", fullUrl);
+
+    return fullUrl;
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Link to="/admin/service-providers" className="text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200 font-medium">
-          <FaArrowLeft className="mr-2" /> Back to Providers
+        <Link to="/admin/housekeepers" className="text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200 font-medium">
+          <FaArrowLeft className="mr-2" /> Back to Housekeepers
         </Link>
       </div>
       
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-5 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800">Provider Verification Details</h1>
-          {provider && (
+          <h1 className="text-2xl font-bold text-gray-800">Housekeeper Verification Details</h1>
+          {housekeeper && (
             <p className="text-gray-600 mt-1">
-              Review and verify documents for {provider.firstName} {provider.lastName}
+              Review and verify documents for {housekeeper.firstName} {housekeeper.lastName}
             </p>
           )}
         </div>
@@ -464,15 +480,15 @@ const ProviderVerificationDetailsPage: React.FC = () => {
           <div className="p-8 flex justify-center items-center">
             <div className="flex flex-col items-center">
               <FaSpinner className="animate-spin text-4xl text-blue-500 mb-2" />
-              <p className="text-gray-500">Loading provider details...</p>
+              <p className="text-gray-500">Loading housekeeper details...</p>
             </div>
           </div>
-        ) : !provider ? (
+        ) : !housekeeper ? (
           <div className="p-8 text-center">
             <div className="bg-yellow-50 rounded-lg p-6 inline-block">
               <FaExclamationTriangle className="text-yellow-500 text-5xl mx-auto mb-3" />
-              <p className="text-gray-700 font-medium">Provider details not found</p>
-              <p className="text-gray-500 text-sm mt-1">The requested provider information is unavailable</p>
+              <p className="text-gray-700 font-medium">Housekeeper details not found</p>
+              <p className="text-gray-500 text-sm mt-1">The requested housekeeper information is unavailable</p>
             </div>
           </div>
         ) : (
@@ -482,24 +498,24 @@ const ProviderVerificationDetailsPage: React.FC = () => {
                 <div className="mb-6 md:mb-0 md:mr-8">
                   <div className="relative">
                     <img
-                      src={getProfileImageUrl(provider.profileImage)}
-                      alt={`${provider.firstName} ${provider.lastName}`}
+                      src={getProfileImageUrl(housekeeper.profileImage)}
+                      alt={`${housekeeper.firstName} ${housekeeper.lastName}`}
                       className="h-40 w-40 rounded-full object-cover border-4 border-white shadow-md"
                       onError={(e) => {
-                        console.log("Image failed to load, using default:", provider.profileImage);
+                        console.log("Image failed to load, using default:", housekeeper.profileImage);
                         const target = e.target as HTMLImageElement;
                         target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
                       }}
                     />
                     <div className="absolute bottom-1 right-1">
-                      {renderStatusBadge(provider.verificationStatus || 'pending')}
+                      {renderStatusBadge(housekeeper.verificationStatus || 'pending')}
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex-1">
                   <h2 className="text-3xl font-bold mb-2 text-gray-800">
-                    {provider.firstName} {provider.lastName}
+                    {housekeeper.firstName} {housekeeper.lastName}
                   </h2>
                   <p className="text-gray-600 mb-2 flex items-center">
                     <span className="inline-block bg-gray-100 rounded-full p-1 mr-2">
@@ -508,22 +524,22 @@ const ProviderVerificationDetailsPage: React.FC = () => {
                         <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                       </svg>
                     </span>
-                    {provider.email}
+                    {housekeeper.email}
                   </p>
-                  {provider.phone && (
+                  {housekeeper.phone && (
                     <p className="text-gray-600 mb-3 flex items-center">
                       <span className="inline-block bg-gray-100 rounded-full p-1 mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                         </svg>
                       </span>
-                      {provider.phone}
+                      {housekeeper.phone}
                     </p>
                   )}
                   
-                  {provider.verificationDate && (
+                  {housekeeper.verificationDate && (
                     <p className="text-sm text-gray-500 mt-2">
-                      Last updated: {new Date(provider.verificationDate).toLocaleDateString('en-US', {
+                      Last updated: {new Date(housekeeper.verificationDate).toLocaleDateString('en-US', {
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric',
@@ -532,26 +548,6 @@ const ProviderVerificationDetailsPage: React.FC = () => {
                       })}
                     </p>
                   )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-6 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1.581.814L10 13.197l-4.419 2.617A1 1 0 014 15V4zm2-1a1 1 0 00-1 1v10.566l3.419-2.022a1 1 0 011.162 0L13 14.566V4a1 1 0 00-1-1H6z" clipRule="evenodd" />
-                </svg>
-                Business Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-gray-500 mb-1">Business Name</p>
-                  <p className="font-medium text-lg">{provider.businessName || 'No business name provided'}</p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-gray-500 mb-1">Bio</p>
-                  <p className="text-gray-700">{provider.bio || 'No bio information provided'}</p>
                 </div>
               </div>
             </div>
@@ -565,14 +561,19 @@ const ProviderVerificationDetailsPage: React.FC = () => {
               </h2>
               
               <div className="space-y-8">
-                {renderDocumentSection('businessRegistration', 'Business Registration')}
-                {renderDocumentSection('representativeId', 'Representative ID')}
-                {renderDocumentSection('professionalLicenses', 'Professional Licenses')}
-                {renderDocumentSection('portfolio', 'Portfolio or Work Experience')}
+                {documents && Object.keys(documents).map(docType => 
+                  renderDocumentSection(docType, docType.charAt(0).toUpperCase() + docType.slice(1).replace(/([A-Z])/g, ' $1'))
+                )}
+                {(!documents || Object.keys(documents).length === 0) && (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                    <FaFolder className="mx-auto text-gray-400 text-4xl mb-2" />
+                    <p className="text-gray-500">No verification documents available</p>
+                  </div>
+                )}
               </div>
               
               <div className="mt-10 flex justify-end space-x-4">
-                {provider.verificationStatus === 'pending' && (
+                {housekeeper.verificationStatus === 'pending' && (
                   <>
                     <button 
                       onClick={() => handleReviewAction(false)}
@@ -580,15 +581,15 @@ const ProviderVerificationDetailsPage: React.FC = () => {
                       className="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center shadow-sm"
                     >
                       {verifying ? <FaSpinner className="animate-spin mr-2" /> : <FaTimes className="mr-2" />}
-                      Reject Provider
+                      Reject Housekeeper
                     </button>
                     <button 
-                      onClick={handleApproveProvider}
+                      onClick={handleApproveHousekeeper}
                       disabled={verifying}
                       className="px-5 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center shadow-sm"
                     >
                       {verifying ? <FaSpinner className="animate-spin mr-2" /> : <FaCheck className="mr-2" />}
-                      Approve Provider
+                      Approve Housekeeper
                     </button>
                   </>
                 )}
@@ -711,4 +712,4 @@ const ProviderVerificationDetailsPage: React.FC = () => {
   );
 };
 
-export default ProviderVerificationDetailsPage;
+export default HousekeeperVerificationDetailsPage;

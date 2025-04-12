@@ -9,8 +9,8 @@ router.post('/', authenticateJWT, bookingController.createBooking);
 // Get all bookings for a customer
 router.get('/customer', authenticateJWT, bookingController.getCustomerBookings);
 
-// Get all bookings for a service provider
-router.get('/provider', authenticateJWT, bookingController.getProviderBookings);
+// Get all bookings for a housekeeper
+router.get('/housekeeper', authenticateJWT, bookingController.getHousekeeperBookings);
 
 // Get booking by ID
 router.get('/:id', authenticateJWT, bookingController.getBookingById);

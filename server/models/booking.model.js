@@ -11,7 +11,7 @@ const bookingSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  provider: {
+  housekeeper: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -64,9 +64,9 @@ const bookingSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Add an index for querying bookings by customer or provider
+// Add an index for querying bookings by customer or housekeeper
 bookingSchema.index({ customer: 1, createdAt: -1 });
-bookingSchema.index({ provider: 1, createdAt: -1 });
+bookingSchema.index({ housekeeper: 1, createdAt: -1 });
 bookingSchema.index({ status: 1 });
 bookingSchema.index({ date: 1 });
 

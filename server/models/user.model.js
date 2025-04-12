@@ -108,7 +108,6 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
 
 const User = mongoose.model('User', UserSchema);
 
-// Provider-specific schema - MOVE all provider fields here
 const HousekeeperSchema = User.discriminator('housekeeper', new Schema({
   experience: {
     type: String,

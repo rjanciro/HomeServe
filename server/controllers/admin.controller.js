@@ -96,35 +96,73 @@ exports.getAllHousekeepers = async (req, res) => {
 exports.getHousekeeperDocuments = async (req, res) => {
   try {
     const userId = req.params.userId;
+    console.log("Finding housekeeper with ID:", userId);
+    
     const user = await User.findById(userId);
     
     if (!user) {
+      console.log("No user found with ID:", userId);
       return res.status(404).json({ message: 'User not found' });
     }
+    
+    console.log("Found user:", user.email, "User type:", user.userType);
     
     // Create a transformed version of the documents with proper URL structure
     const transformedDocuments = {};
     
+    // Check if verificationDocuments exists
+    if (!user.verificationDocuments) {
+      console.log("User has no verification documents");
+      // Return empty documents instead of failing
+      return res.json({
+        housekeeper: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          profileImage: user.profileImage,
+          businessName: user.businessName,
+          bio: user.bio,
+          verificationStatus: user.verificationStatus || 'pending'
+        },
+        documents: {},
+        history: user.verificationHistory || []
+      });
+    }
+    
+    // Log the document structure
+    console.log("Document types:", Object.keys(user.verificationDocuments));
+    
     // Go through each document type
     for (const docType in user.verificationDocuments) {
-      if (user.verificationDocuments[docType]) {
+      if (user.verificationDocuments[docType] && user.verificationDocuments[docType].files) {
+        console.log(`Processing ${docType} with ${user.verificationDocuments[docType].files.length} files`);
+        
         transformedDocuments[docType] = {
-          ...user.verificationDocuments[docType],
-          files: user.verificationDocuments[docType].files.map(file => ({
-            id: file.id,
-            filename: file.filename,
-            url: `/uploads/verification/${file.filename}`,  // Convert path to url
-            uploadDate: file.uploadDate,
-            mimetype: file.mimetype,
-            verified: false  // Set default or get from elsewhere
-          }))
+          verified: user.verificationDocuments[docType].verified,
+          uploadDate: user.verificationDocuments[docType].uploadDate,
+          notes: user.verificationDocuments[docType].notes,
+          files: user.verificationDocuments[docType].files.map(file => {
+            const fileUrl = file && file.path ? file.path : '';
+            return {
+              id: file.id || file._id,
+              filename: file.filename,
+              url: fileUrl,
+              uploadDate: file.uploadDate,
+              mimetype: file.mimetype,
+              verified: file.verified || false,
+              size: file.size
+            };
+          })
         };
+      } else {
+        console.log(`Document type ${docType} has no files or is not properly structured`);
       }
     }
     
     // Return the transformed documents
     res.json({
-      provider: {
+      housekeeper: {
         _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -138,7 +176,7 @@ exports.getHousekeeperDocuments = async (req, res) => {
       history: user.verificationHistory || []
     });
   } catch (error) {
-    console.error('Error getting provider documents:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error getting housekeeper documents:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 }; 

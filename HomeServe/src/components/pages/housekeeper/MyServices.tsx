@@ -284,6 +284,16 @@ const MyServicesPage: React.FC = () => {
     }
   };
 
+  // Helper function to get the full image URL
+  const getServiceImageUrl = (imagePath: string | undefined): string | null => {
+    if (!imagePath) {
+      return null; // No image path provided
+    }
+    // Assuming imagePath is like '/uploads/services_pictures/service-...'
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'; 
+    return `${apiBaseUrl}${imagePath}`;
+  };
+
   const renderVerificationStatus = () => {
     // If user is disabled
     if (!isVerified && user?.isActive === false) {
@@ -422,72 +432,101 @@ const MyServicesPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <div key={service.id || service._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md">
-              {/* Service card content */}
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    {service.name}
-                  </h3>
-                  <div className="flex space-x-1">
-                    <button 
-                      onClick={() => handleToggleAvailability(service.id || service._id, service.isAvailable)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        service.isAvailable 
-                          ? 'text-green-600 hover:bg-green-50' 
-                          : 'text-gray-400 hover:bg-gray-50'
-                      }`}
-                      title={service.isAvailable ? 'Set as Unavailable' : 'Set as Available'}
+          {services.map((service) => {
+            // Get the full image URL for this service
+            const imageUrl = getServiceImageUrl(service.image); 
+            
+            return (
+              <div key={service.id || service._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md flex flex-col">
+                {/* Service Image Display */}
+                {imageUrl ? (
+                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={imageUrl} 
+                      alt={`Image for ${service.name}`} 
+                      className="w-full h-full object-cover" // Use object-cover to fill the container
+                      onError={(e) => {
+                        console.error(`Failed to load image: ${imageUrl}`);
+                        // Optional: You could hide the image container or show a placeholder icon on error
+                        (e.target as HTMLImageElement).style.display = 'none'; 
+                        // Or replace src with a placeholder:
+                        // (e.target as HTMLImageElement).src = '/path/to/placeholder.png'; 
+                      }}
+                    />
+                  </div>
+                ) : (
+                  // Optional: Placeholder if no image exists
+                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+                    <FaTools size={40} /> {/* Example placeholder icon */}
+                  </div>
+                )}
+
+                {/* Service card content */}
+                <div className="p-5 flex flex-col flex-grow"> {/* Added flex-grow */}
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      {service.name}
+                    </h3>
+                    <div className="flex space-x-1">
+                      <button 
+                        onClick={() => handleToggleAvailability(service.id || service._id, service.isAvailable)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          service.isAvailable 
+                            ? 'text-green-600 hover:bg-green-50' 
+                            : 'text-gray-400 hover:bg-gray-50'
+                        }`}
+                        title={service.isAvailable ? 'Set as Unavailable' : 'Set as Available'}
+                      >
+                        {service.isAvailable ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <span className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2">
+                      {service.category}
+                    </span>
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                      {service.pricingType}
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">{service.description}</p> {/* Added flex-grow */}
+                  
+                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+                    <div className="flex items-center text-gray-700">
+                      <FaMoneyBillWave className="mr-2 text-green-500" />
+                      <span>₱{service.price} {service.pricingType === 'Hourly' ? '/hr' : ''}</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <FaTools className="mr-2 text-blue-500" />
+                      <span>{service.estimatedCompletionTime}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-sm text-gray-600 mb-3">
+                    <strong>Location:</strong> {service.serviceLocation}
+                  </div>
+
+                  {/* Buttons should be at the bottom */}
+                  <div className="flex space-x-2 pt-3 border-t border-gray-100 mt-auto"> {/* Added mt-auto */}
+                    <button
+                      onClick={() => handleEditService(service)}
+                      className="text-blue-500 hover:bg-blue-50 px-3 py-1 rounded-md transition-colors flex items-center"
                     >
-                      {service.isAvailable ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
+                      <FaEdit className="mr-1" /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteService(service.id || service._id)}
+                      className="text-red-500 hover:bg-red-50 px-3 py-1 rounded-md transition-colors flex items-center"
+                    >
+                      <FaTrash className="mr-1" /> Delete
                     </button>
                   </div>
                 </div>
-                
-                <div className="mb-3">
-                  <span className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2">
-                    {service.category}
-                  </span>
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                    {service.pricingType}
-                  </span>
-                </div>
-                
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{service.description}</p>
-                
-                <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                  <div className="flex items-center text-gray-700">
-                    <FaMoneyBillWave className="mr-2 text-green-500" />
-                    <span>₱{service.price} {service.pricingType === 'Hourly' ? '/hr' : ''}</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <FaTools className="mr-2 text-blue-500" />
-                    <span>{service.estimatedCompletionTime}</span>
-                  </div>
-                </div>
-                
-                <div className="text-sm text-gray-600 mb-3">
-                  <strong>Location:</strong> {service.serviceLocation}
-                </div>
-                
-                <div className="flex space-x-2 pt-3 border-t border-gray-100">
-                  <button
-                    onClick={() => handleEditService(service)}
-                    className="text-blue-500 hover:bg-blue-50 px-3 py-1 rounded-md transition-colors flex items-center"
-                  >
-                    <FaEdit className="mr-1" /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteService(service.id || service._id)}
-                    className="text-red-500 hover:bg-red-50 px-3 py-1 rounded-md transition-colors flex items-center"
-                  >
-                    <FaTrash className="mr-1" /> Delete
-                  </button>
-                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       

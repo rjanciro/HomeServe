@@ -9,6 +9,7 @@ const adminRoutes = require('./routes/admin.routes');
 const createUploadDirs = require('./setup-uploads');
 const fs = require('fs');
 const { startWebSocketServer } = require('./websocket-server');
+const browseRoutes = require('./routes/browse.routes');
 
 // Load environment variables
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/services', require('./routes/service.routes'));
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/verification', require('./routes/admin.verification.routes'));
 app.use('/api/documents', require('./routes/document.routes'));
+app.use('/api/browse', browseRoutes);
 try {
   app.use('/api/bookings', require('./routes/booking.routes'));
   console.log('Booking routes loaded successfully');

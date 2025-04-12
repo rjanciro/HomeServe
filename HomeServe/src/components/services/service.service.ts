@@ -39,6 +39,8 @@ export interface Service {
   image?: string;
   housekeeper?: string;
   createdAt?: string;
+  updatedAt?: string;
+  tags?: string;
 }
 
 export const serviceService = {

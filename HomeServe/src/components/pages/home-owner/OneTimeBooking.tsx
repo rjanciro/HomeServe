@@ -245,22 +245,29 @@ const OneTimeBooking: React.FC = () => {
       
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-4 mb-8 border border-gray-200">
-        <h2 className="text-lg font-semibold mb-4">Filter Options</h2>
+        <h2 className="text-lg font-semibold mb-4 text-[#133E87]">Find Your Perfect Service</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Service Category</label>
-            <select
-              name="serviceCategory"
-              value={filters.serviceCategory}
-              onChange={handleFilterChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-            >
-              <option value="">All Categories</option>
-              <option value="General Cleaning">General Cleaning</option>
-              <option value="Deep Cleaning">Deep Cleaning</option>
-              <option value="Laundry & Ironing">Laundry & Ironing</option>
-              <option value="Pet Services">Pet Services</option>
-            </select>
+            <div className="relative">
+              <select
+                name="serviceCategory"
+                value={filters.serviceCategory}
+                onChange={handleFilterChange}
+                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none"
+              >
+                <option value="">All Categories</option>
+                <option value="General Cleaning">General Cleaning</option>
+                <option value="Deep Cleaning">Deep Cleaning</option>
+                <option value="Laundry & Ironing">Laundry & Ironing</option>
+                <option value="Pet Services">Pet Services</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           
           <div>
@@ -383,19 +390,21 @@ const OneTimeBooking: React.FC = () => {
                   {housekeeper.services.filter(s => s.isAvailable).map((service) => {
                      const serviceImageUrl = getServiceImageUrl(service.image); 
                      return (
-                       <div key={service._id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
-                         {/* Image */}
+                       <div key={service._id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:translate-y-[-2px] transition-all duration-200 overflow-hidden flex flex-col">
+                         {/* Image with skeleton loader */}
                          {serviceImageUrl && (
-                           <div className="w-full h-48 bg-gray-100 relative">
+                           <div className="w-full h-48 bg-gray-100 relative overflow-hidden">
+                             <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
                              <img
                                src={serviceImageUrl} alt={service.name}
-                               className="w-full h-full object-cover"
+                               className="w-full h-full object-cover relative z-10"
+                               onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; }}
+                               style={{ opacity: 0, transition: 'opacity 0.3s ease' }}
                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                              />
-                             {/* Optional: Add a badge overlay, e.g., for Featured or Verified */}
-                             {/* {housekeeper.certifications && housekeeper.certifications.length > 0 && (
-                               <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow">✔ Verified</span>
-                             )} */}
+                             {service.featured && (
+                               <span className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow z-20">Featured</span>
+                             )}
                            </div>
                          )}
                        
@@ -458,7 +467,7 @@ const OneTimeBooking: React.FC = () => {
                            <div> {/* Removed mt-auto from here */}
                               <button
                                  onClick={() => handleBookNow(housekeeper, service)}
-                                 className="w-full bg-[#133E87] text-white px-4 py-2 rounded-md hover:bg-[#0f2f66] transition-colors font-semibold text-sm"
+                                 className="w-full bg-gradient-to-r from-[#133E87] to-[#1a4c9e] text-white px-4 py-2 rounded-md hover:from-[#0f2f66] hover:to-[#1a4c9e] transition-all font-semibold text-sm"
                              >
                                  Book Now
                              </button>
@@ -477,15 +486,35 @@ const OneTimeBooking: React.FC = () => {
       {showProfile && selectedHousekeeper && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold">{selectedHousekeeper.name}'s Profile</h2>
-                <button 
-                  onClick={() => setShowProfile(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
+            <div className="p-0 border-b border-gray-200">
+              <div className="relative h-32 bg-gradient-to-r from-[#133E87] to-[#2563EB]">
+                <div className="absolute bottom-0 left-6 transform translate-y-1/2 w-24 h-24 rounded-full bg-white p-1 shadow-md">
+                  <img 
+                    src={getProfileImageUrl(selectedHousekeeper.image)} 
+                    alt={selectedHousekeeper.name} 
+                    className="w-full h-full object-cover rounded-full" 
+                    onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
+                  />
+                </div>
+                <div className="absolute top-4 right-4">
+                  <button 
+                    onClick={() => setShowProfile(false)}
+                    className="text-white bg-white/20 hover:bg-white/30 rounded-full p-1"
+                  >
+                    <span className="sr-only">Close</span>
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <div className="pt-16 pb-4 px-6">
+                <h2 className="text-2xl font-bold">{selectedHousekeeper.name}</h2>
+                <div className="flex items-center text-amber-500">
+                  <FaStar className="mr-1" />
+                  <span className="font-semibold">{selectedHousekeeper.rating}</span>
+                  <span className="text-gray-600 ml-1">({selectedHousekeeper.reviewCount} reviews)</span>
+                  <span className="mx-2">•</span>
+                  <span className="text-gray-600">{selectedHousekeeper.location}</span>
+                </div>
               </div>
             </div>
             

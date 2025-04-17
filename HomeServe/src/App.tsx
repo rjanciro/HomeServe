@@ -9,7 +9,7 @@ import Login from './components/authentication/login/Login';
 import PrivateRoute from './components/guards/PrivateRoute';
 
 // Home Owner Components
-import HomeOwnerDashboard from './components/dashboard/home-owner/HomeOwnerDashboard';
+import HomeOwnerDashboard from './components/dashboard/home-owner/HomeOwnerDashboard.tsx';
 import HomeOwnerSidebar from './components/layout/HomeOwnerSidebar';
 import Messaging from './components/pages/home-owner/HomeOwnerMessaging';
 import History from './components/pages/home-owner/History';

@@ -2,7 +2,7 @@ import React from 'react';
 import { FaCalendar } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 
-const DashboardPage: React.FC = () => {
+const HomeOwnerDashboard: React.FC = () => {
   useDocumentTitle('Dashboard');
 
   return (
@@ -48,4 +48,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default HomeOwnerDashboard;

@@ -20,7 +20,7 @@ interface DashboardMetrics {
 }
 
 const AdminDashboard: React.FC = () => {
-  useDocumentTitle('Admin Dashboard | HomeServe Connect');
+  useDocumentTitle('Admin Dashboard | HomeServe');
   
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalUsers: 0,

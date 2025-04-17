@@ -41,6 +41,7 @@ export interface Service {
   createdAt?: string;
   updatedAt?: string;
   tags?: string;
+  featured?: boolean;
 }
 
 export const serviceService = {

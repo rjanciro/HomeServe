@@ -1,5 +1,5 @@
-import React, { useState, FormEvent, ChangeEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, FormEvent, ChangeEvent, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import LogoBlue from '../../../assets/icons/HomeServe_Logo_Blue.png';
@@ -12,12 +12,23 @@ import axios from 'axios';
 const LoginPage: React.FC = () => {
   useDocumentTitle('Login');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [userType, setUserType] = useState<UserType>('homeowner');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const type = searchParams.get('type');
+    if (type === 'housekeeper') {
+      setUserType('housekeeper');
+    } else {
+      setUserType('homeowner');
+    }
+  }, [location]);
 
   // Dynamically select the logo based on userType
   const logo = userType === 'homeowner' ? LogoBlue : LogoGreen;
@@ -85,7 +96,7 @@ const LoginPage: React.FC = () => {
         <div className="text-center mb-1">
           <img 
             src={logo} 
-            alt="HomeServe Connect" 
+            alt="HomeServe" 
             className="mx-auto w-40 mb-1" 
           />
         </div>
@@ -196,7 +207,7 @@ const LoginPage: React.FC = () => {
         <p className="mt-8 text-center text-gray-600">
           Don't have an account?{' '}
           <Link 
-            to="/signup" 
+            to={`/signup${userType === 'housekeeper' ? '?type=housekeeper' : ''}`} 
             className={`${
               userType === 'homeowner' 
                 ? 'text-[#133E87] hover:text-[#1F5CD1]' 

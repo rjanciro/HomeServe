@@ -35,7 +35,6 @@ import UsersHousekeepersPage from './components/pages/admin/user-management/User
 import HousekeeperVerificationDetails from './components/pages/admin/user-management/HousekeeperVerificationDetails';
 
 // Both Components
-import EmailVerification from './components/authentication/EmailVerification';
 import VerificationPending from './components/authentication/VerificationPending';
 
 

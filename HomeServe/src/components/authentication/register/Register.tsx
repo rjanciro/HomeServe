@@ -142,7 +142,7 @@ const RegisterPage: React.FC = () => {
         <div className="text-center mb-1">
           <img 
             src={logo} 
-            alt="HomeServe Connect" 
+            alt="HomeServe" 
             className="mx-auto w-40 mb-1" 
           />
         </div>
@@ -329,7 +329,7 @@ const RegisterPage: React.FC = () => {
         <p className="mt-8 text-center text-gray-600">
           Already have an account?{' '}
           <Link 
-            to="/login" 
+            to={`/login${userType === 'housekeeper' ? '?type=housekeeper' : ''}`} 
             className={`${
               userType === 'homeowner' 
                 ? 'text-[#133E87] hover:text-[#1F5CD1]' 

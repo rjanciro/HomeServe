@@ -55,7 +55,7 @@ const AdminLoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-md w-full p-8 bg-white rounded-xl shadow-lg">
         <div className="text-center mb-6">
-          <img src={Logo} alt="HomeServe Connect" className="mx-auto w-48 mb-2" />
+          <img src={Logo} alt="HomeServe" className="mx-auto w-48 mb-2" />
           <div className="flex items-center justify-center gap-2 text-red-600">
             <FaShieldAlt size={20} />
             <h2 className="text-2xl font-bold">Admin Portal</h2>

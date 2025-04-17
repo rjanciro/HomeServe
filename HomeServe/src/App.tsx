@@ -9,7 +9,6 @@ import Login from './components/authentication/login/Login';
 import PrivateRoute from './components/guards/PrivateRoute';
 
 // Home Owner Components
-import HomeOwnerDashboard from './components/dashboard/home-owner/HomeOwnerDashboard.tsx';
 import HomeOwnerSidebar from './components/layout/HomeOwnerSidebar';
 import Messaging from './components/pages/home-owner/HomeOwnerMessaging';
 import History from './components/pages/home-owner/History';
@@ -90,7 +89,6 @@ const App: React.FC = () => {
             
             {/* Home Owner routes */}
             <Route element={<PrivateRoute element={<HomeOwnerSidebar />} userType="homeowner" />}>
-              <Route path="/dashboard" element={<HomeOwnerDashboard />} />
               <Route path="/job-posts" element={<JobPosts />} />
               <Route path="/history" element={<History />} />
               <Route path="/messages" element={<Messaging />} />

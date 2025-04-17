@@ -1,4 +1,14 @@
+name = "homeserve"
+compatibility_date = "2023-05-10"
+
+[site]
+bucket = "./dist"
+
 [build]
 command = "npm run build"
+
+[build.environment]
+NODE_VERSION = "18.17.1"
+
 [build.upload]
 format = "service-worker"

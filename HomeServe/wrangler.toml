@@ -6,9 +6,14 @@ bucket = "./dist"
 
 [build]
 command = "npm run build"
+output_directory = "dist"
+
+# Add this for Pages deployment
+[pages]
+pages_build_output_dir = "dist"
 
 [build.environment]
-NODE_VERSION = "18.17.1"
+NODE_VERSION = "18.18.0"
 
 [build.upload]
 format = "service-worker"

@@ -130,11 +130,16 @@ const OneTimeBooking: React.FC = () => {
   const applyFilters = () => {
     let filtered = [...housekeepers].filter(hk => hk.isActive);
 
+    // --- Updated Service Category Filter ---
     if (filters.serviceCategory) {
+      const categoryQuery = filters.serviceCategory.toLowerCase();
       filtered = filtered.filter(hk => 
-        hk.services.some(s => s.category === filters.serviceCategory && s.isAvailable)
+        hk.services.some(s => 
+          s.category.toLowerCase().includes(categoryQuery) && s.isAvailable
+        )
       );
     }
+    // --- End Updated Service Category Filter ---
 
     if (filters.serviceName) {
         const query = filters.serviceName.toLowerCase();
@@ -147,11 +152,18 @@ const OneTimeBooking: React.FC = () => {
         );
     }
 
+    // --- Updated Location Filter to use service.serviceLocation ---
     if (filters.location) {
+      const locationQuery = filters.location.toLowerCase();
       filtered = filtered.filter(hk => 
-        hk.location.toLowerCase().includes(filters.location.toLowerCase())
+        hk.services.some(s => 
+          s.isAvailable && 
+          s.serviceLocation && 
+          s.serviceLocation.toLowerCase().includes(locationQuery)
+        )
       );
     }
+    // --- End Updated Location Filter ---
     
     filtered = filtered.filter(hk => hk.rating >= filters.minRating);
     
@@ -247,28 +259,19 @@ const OneTimeBooking: React.FC = () => {
       <div className="bg-white rounded-lg shadow p-4 mb-8 border border-gray-200">
         <h2 className="text-lg font-semibold mb-4 text-[#133E87]">Find Your Perfect Service</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="relative">
+          {/* --- Service Category Input --- */}
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Service Category</label>
-            <div className="relative">
-              <select
-                name="serviceCategory"
-                value={filters.serviceCategory}
-                onChange={handleFilterChange}
-                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none"
-              >
-                <option value="">All Categories</option>
-                <option value="General Cleaning">General Cleaning</option>
-                <option value="Deep Cleaning">Deep Cleaning</option>
-                <option value="Laundry & Ironing">Laundry & Ironing</option>
-                <option value="Pet Services">Pet Services</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <input
+              type="text"
+              name="serviceCategory"
+              placeholder="e.g., Cleaning, Laundry"
+              value={filters.serviceCategory}
+              onChange={handleFilterChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
+            />
           </div>
+          {/* --- End Service Category Input --- */}
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Service Name / Keyword</label>
@@ -282,21 +285,19 @@ const OneTimeBooking: React.FC = () => {
             />
           </div>
           
+          {/* --- Location Input --- */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <select
+            <input
+              type="text"
               name="location"
+              placeholder="e.g., Quezon City, Makati"
               value={filters.location}
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-            >
-              <option value="">All Locations</option>
-              <option value="Quezon City">Quezon City</option>
-              <option value="Makati City">Makati City</option>
-              <option value="Pasig City">Pasig City</option>
-              <option value="Taguig City">Taguig City</option>
-            </select>
+            />
           </div>
+          {/* --- End Location Input --- */}
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Rating</label>
@@ -350,38 +351,6 @@ const OneTimeBooking: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredHousekeepers.map(housekeeper => (
             <div key={housekeeper.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 flex flex-col overflow-hidden">
-              <div className="flex items-center p-4 gap-4 border-b border-gray-100">
-                <img 
-                    src={getProfileImageUrl(housekeeper.image)} 
-                    alt={housekeeper.name} 
-                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" 
-                    onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }} 
-                 />
-                <div className="flex-grow">
-                  <h3 
-                    className="text-lg font-semibold text-gray-800 hover:text-[#133E87] cursor-pointer" 
-                    onClick={() => handleViewProfile(housekeeper)}
-                  >
-                      {housekeeper.name}
-                  </h3>
-                  <div className="flex items-center text-gray-500 text-xs mt-1 space-x-3">
-                      <span className='flex items-center'>
-                          <FaMapMarkerAlt className="mr-1 text-gray-400" size={12}/>
-                          {housekeeper.location || 'N/A'} 
-                      </span>
-                      <span className='flex items-center'>
-                           <FaStar className="mr-1 text-amber-400" size={12}/>
-                          {housekeeper.rating?.toFixed(1) || '0.0'} ({housekeeper.reviewCount || 0})
-                      </span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => handleViewProfile(housekeeper)}
-                  className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md hover:bg-gray-200 transition-colors font-medium"
-                >
-                  Profile
-                </button>
-              </div>
               
               <div className="p-4 space-y-4 bg-gray-50/50 flex-grow"> 
                   {housekeeper.services.filter(s => s.isAvailable).length === 0 && (
@@ -457,9 +426,10 @@ const OneTimeBooking: React.FC = () => {
                                    <FaMoneyBillWave className="mr-1.5" />
                                    ₱{service.price}
                                </span>
-                               <span className="flex items-center text-gray-500 text-xs" title={`Provider based in ${housekeeper.location}`}>
+                               {/* Updated to use service.serviceLocation */}
+                               <span className="flex items-center text-gray-500 text-xs" title={`Service offered in ${service.serviceLocation || 'N/A'}`}>
                                    <FaMapMarkerAlt className="mr-1 text-gray-400" size={12} />
-                                   {housekeeper.location || 'Location N/A'}
+                                   {service.serviceLocation || 'Location N/A'} 
                                </span>
                            </div>
 

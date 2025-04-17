@@ -359,9 +359,9 @@ const MyServicesPage: React.FC = () => {
               <FaCheckCircle className="h-6 w-6 text-green-500" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-green-800">Verification Successful!</h3>
+              <h3 className="text-lg font-medium text-green-800">Account Verified!</h3>
               <p className="text-green-700 mt-1">
-                Your account has been verified. You can now add and manage your services.
+                Your account is verified. You can now add and manage your services.
               </p>
             </div>
           </div>
